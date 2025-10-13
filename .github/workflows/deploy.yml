@@ -1,4 +1,4 @@
-name: 🚀 Deploy to VPS (Smart + Cached + Dynamic Memory)
+name: 🚀 Deploy to Production Server
 
 on:
   push:
