@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DEBUG: true # Set to true for verbose SSH logging
+      DEBUG: false # Set to true for verbose SSH logging
 
     steps:
       # ======================================================
