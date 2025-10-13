@@ -49,14 +49,14 @@ jobs:
       - name: 🔐 Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SINGINGBOWL_SSH_PRIVATE_KEY }}
 
       # ======================================================
       # 4️⃣ DEPLOY TO VPS
       # ======================================================
       - name: 🚀 Deploy to VPS
         env:
-          VPS_USER: ${{ secrets.USER }}
+          VPS_USER: ${{ secrets.SINGINGBOWL_USER }}
           VPS_HOST: ${{ secrets.QUARK_VPS_HOST }}
           VPS_PORT: ${{ secrets.QUARK_VPS_PORT }}
           GIT_AUTH_TOKEN: ${{ secrets.GIT_AUTH_TOKEN }}
