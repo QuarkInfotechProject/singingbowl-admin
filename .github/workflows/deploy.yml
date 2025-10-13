@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DEBUG: true # Change to true to enable verbose logging
+      DEBUG: true # Set to true for verbose logs during troubleshooting
 
     steps:
       # ---------------------------------------
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout repository
       # ---------------------------------------
       - name: ⏳ Checkout Repository
         uses: actions/checkout@v4
@@ -23,21 +23,20 @@ jobs:
           fetch-depth: 0
 
       # ---------------------------------------
-      # 2️⃣ Setup Node.js and PNPM (cached)
+      # 2️⃣ Setup Node.js and install PNPM
       # ---------------------------------------
       - name: 🧰 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
       - name: 📦 Install PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        run: |
+          npm install -g pnpm
+          pnpm --version
 
       # ---------------------------------------
-      # 3️⃣ Setup SSH Authentication
+      # 3️⃣ Setup SSH for secure access
       # ---------------------------------------
       - name: 🔐 Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -65,14 +64,14 @@ jobs:
           fi
 
           ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST -p $VPS_PORT << 'EOF'
-            set -e  # Exit on any error
+            set -e
             echo "🖥️ Connected successfully to $(hostname)"
             echo "📦 Starting deployment process..."
 
-            echo "➡️ Navigating to project directory: $DEPLOY_PATH"
+            echo "➡️ Navigating to project directory..."
             cd $DEPLOY_PATH || { echo "❌ Directory not found: $DEPLOY_PATH"; exit 1; }
 
-            echo "🔄 Fetching latest code from GitHub..."
+            echo "🔄 Fetching latest code..."
             git remote set-url origin https://x-access-token:${GIT_AUTH_TOKEN}@github.com/QQuarkInfotechProject/singingbowl-admin.git
             git fetch origin master
             git reset --hard origin/master
