@@ -1,0 +1,96 @@
+name: 🚀 Deploy to VPS (Smart Deploy)
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+
+    env:
+      DEBUG: true # Change to true to enable verbose logging
+
+    steps:
+      # ---------------------------------------
+      # 1️⃣ Checkout the repository
+      # ---------------------------------------
+      - name: ⏳ Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ---------------------------------------
+      # 2️⃣ Setup Node.js and PNPM (cached)
+      # ---------------------------------------
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: 📦 Install PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      # ---------------------------------------
+      # 3️⃣ Setup SSH Authentication
+      # ---------------------------------------
+      - name: 🔐 Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # ---------------------------------------
+      # 4️⃣ Deploy to VPS
+      # ---------------------------------------
+      - name: 🚀 Deploy to VPS
+        env:
+          VPS_USER: ${{ secrets.USER }}
+          VPS_HOST: ${{ secrets.QUARK_VPS_HOST }}
+          VPS_PORT: ${{ secrets.QUARK_VPS_PORT }}
+          GIT_AUTH_TOKEN: ${{ secrets.GIT_AUTH_TOKEN }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEBUG: ${{ env.DEBUG }}
+        run: |
+          echo "🌍 Connecting to VPS: $VPS_HOST:$VPS_PORT as $VPS_USER"
+          echo "📂 Target Path: $DEPLOY_PATH"
+
+          if [ "$DEBUG" = "true" ]; then
+            echo "🧩 DEBUG MODE ENABLED — showing detailed logs"
+            set -x
+          fi
+
+          ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST -p $VPS_PORT << 'EOF'
+            set -e  # Exit on any error
+            echo "🖥️ Connected successfully to $(hostname)"
+            echo "📦 Starting deployment process..."
+
+            echo "➡️ Navigating to project directory: $DEPLOY_PATH"
+            cd $DEPLOY_PATH || { echo "❌ Directory not found: $DEPLOY_PATH"; exit 1; }
+
+            echo "🔄 Fetching latest code from GitHub..."
+            git remote set-url origin https://x-access-token:${GIT_AUTH_TOKEN}@github.com/QQuarkInfotechProject/singingbowl-admin.git
+            git fetch origin master
+            git reset --hard origin/master
+
+            echo "📥 Installing dependencies..."
+            pnpm install --frozen-lockfile
+
+            echo "⚙️ Building project..."
+            pnpm run build
+
+            echo "🔁 Restarting PM2 service..."
+            pm2 startOrRestart ecosystem.config.js --env production
+
+            echo "✅ Deployment completed successfully!"
+            echo "📅 Completed on: $(date)"
+          EOF
+
+          if [ "$DEBUG" = "true" ]; then
+            set +x
+            echo "🧩 DEBUG MODE DISABLED — end of verbose logs"
+          fi
