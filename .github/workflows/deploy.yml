@@ -1,4 +1,4 @@
-name: 🚀 Deploy to VPS (Smart Deploy)
+name: 🚀 Deploy to VPS (Smart + Cached)
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DEBUG: true # Set to true for verbose logs during troubleshooting
+      DEBUG: true # Toggle to true for verbose logging
 
     steps:
       # ---------------------------------------
@@ -23,20 +23,28 @@ jobs:
           fetch-depth: 0
 
       # ---------------------------------------
-      # 2️⃣ Setup Node.js and install PNPM
+      # 2️⃣ Setup Node.js + PNPM + Caching
       # ---------------------------------------
       - name: 🧰 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: 📦 Install PNPM
+      - name: 📦 Cache PNPM Store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: ⚡ Install PNPM
         run: |
           npm install -g pnpm
-          pnpm --version
+          echo "✅ PNPM version: $(pnpm --version)"
 
       # ---------------------------------------
-      # 3️⃣ Setup SSH for secure access
+      # 3️⃣ Setup SSH
       # ---------------------------------------
       - name: 🔐 Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -59,37 +67,41 @@ jobs:
           echo "📂 Target Path: $DEPLOY_PATH"
 
           if [ "$DEBUG" = "true" ]; then
-            echo "🧩 DEBUG MODE ENABLED — showing detailed logs"
+            echo "🧩 DEBUG MODE ENABLED — detailed logs will be shown"
             set -x
           fi
 
-          ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST -p $VPS_PORT << 'EOF'
+          ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST -p $VPS_PORT "
             set -e
-            echo "🖥️ Connected successfully to $(hostname)"
-            echo "📦 Starting deployment process..."
+            echo '🖥️ Connected successfully to ' \$(hostname)
+            echo '📦 Starting deployment in: $DEPLOY_PATH'
 
-            echo "➡️ Navigating to project directory..."
-            cd $DEPLOY_PATH || { echo "❌ Directory not found: $DEPLOY_PATH"; exit 1; }
+            if [ ! -d '$DEPLOY_PATH/.git' ]; then
+              echo '❌ ERROR: .git folder not found in $DEPLOY_PATH'
+              echo '🔍 Run ls -a in that directory to confirm.'
+              exit 1
+            fi
 
-            echo "🔄 Fetching latest code..."
-            git remote set-url origin https://x-access-token:${GIT_AUTH_TOKEN}@github.com/QQuarkInfotechProject/singingbowl-admin.git
+            cd '$DEPLOY_PATH'
+
+            echo '🔄 Pulling latest code from master...'
             git fetch origin master
             git reset --hard origin/master
 
-            echo "📥 Installing dependencies..."
+            echo '📥 Installing dependencies (using pnpm)...'
             pnpm install --frozen-lockfile
 
-            echo "⚙️ Building project..."
+            echo '⚙️ Building project...'
             pnpm run build
 
-            echo "🔁 Restarting PM2 service..."
+            echo '🔁 Restarting PM2 service...'
             pm2 startOrRestart ecosystem.config.js --env production
 
-            echo "✅ Deployment completed successfully!"
-            echo "📅 Completed on: $(date)"
-          EOF
+            echo '✅ Deployment completed successfully!'
+            echo '📅 Finished at: ' \$(date)
+          "
 
           if [ "$DEBUG" = "true" ]; then
             set +x
-            echo "🧩 DEBUG MODE DISABLED — end of verbose logs"
+            echo "🧩 DEBUG MODE DISABLED — end of logs"
           fi
