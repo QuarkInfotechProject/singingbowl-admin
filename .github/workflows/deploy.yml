@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DEBUG: true # Toggle to true for verbose SSH logging
+      DEBUG: true # Set to true for verbose SSH logging
 
     steps:
       # ======================================================
@@ -20,7 +20,7 @@ jobs:
       - name: ⏳ Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # full history for proper git ops
+          fetch-depth: 0 # Full history for clean git operations
 
       # ======================================================
       # 2️⃣ SETUP NODE.JS + PNPM + CACHE
@@ -62,6 +62,7 @@ jobs:
           GIT_AUTH_TOKEN: ${{ secrets.GIT_AUTH_TOKEN }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           DEBUG: ${{ env.DEBUG }}
+          REPO_SLUG: ${{ github.repository }}
         run: |
           echo "🌍 Connecting to VPS: $VPS_HOST:$VPS_PORT as $VPS_USER"
           echo "📂 Target Path: $DEPLOY_PATH"
@@ -73,10 +74,10 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST -p $VPS_PORT "
             set -e
-          
+
             echo '🖥️ Connected to:' \$(hostname)
             echo '📦 Starting deployment in:' $DEPLOY_PATH
-          
+
             # ================================
             # CHECK OR CREATE DEPLOYMENT DIRECTORY
             # ================================
@@ -86,25 +87,31 @@ jobs:
               echo '🆕 New deployment directory created.'
             fi
             cd '$DEPLOY_PATH'
-          
+
             # ================================
             # GIT OPERATIONS
             # ================================
             echo '🔄 Updating repository...'
             if [ ! -d '.git' ]; then
               echo '⚠️ .git folder missing — cloning repository fresh...'
-              git clone https://x-access-token:${GIT_AUTH_TOKEN}@github.com/QQuarkInfotechProject/singingbowl-admin.git .
+
+              if [ -z '${GIT_AUTH_TOKEN}' ]; then
+                echo '❌ ERROR: GIT_AUTH_TOKEN not set or invalid. Check GitHub Secrets.'
+                exit 1
+              fi
+
+              git clone https://x-access-token:${GIT_AUTH_TOKEN}@github.com/${REPO_SLUG}.git .
             else
               git fetch origin master
               git reset --hard origin/master
             fi
-          
+
             # ================================
             # DEPENDENCIES INSTALL
             # ================================
             echo '📥 Installing dependencies with PNPM...'
             pnpm install --frozen-lockfile
-          
+
             # ================================
             # BUILD (Dynamic Memory)
             # ================================
@@ -112,17 +119,25 @@ jobs:
             TOTAL_MEM=\$(free -m | awk '/^Mem:/{print \$2}')
             BUILD_MEM=\$((TOTAL_MEM * 75 / 100))
             export NODE_OPTIONS=\"--max-old-space-size=\$BUILD_MEM\"
-          
+
             echo \"🧠 Total Memory: \${TOTAL_MEM}MB | Allocating: \${BUILD_MEM}MB for Node build\"
             echo '🏗️ Building project...'
             pnpm run build
-          
+
             # ================================
             # PM2 DEPLOYMENT
             # ================================
             echo '🔁 Restarting PM2 service...'
             pm2 startOrRestart ecosystem.config.js --env production
-          
+
+            # ================================
+            # SUCCESS MESSAGE
+            # ================================
             echo '✅ Deployment completed successfully!'
             echo '📅 Finished at:' \$(date)
           "
+
+          if [ "$DEBUG" = "true" ]; then
+            set +x
+            echo "🧩 DEBUG MODE DISABLED — end of logs"
+          fi
