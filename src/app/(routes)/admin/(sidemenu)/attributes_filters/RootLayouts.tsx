@@ -88,29 +88,56 @@ const RootLayouts: React.FC<RootLayoutsProps> = ({ categories }) => {
   const [selectedAttributes, setSelectedAttributes] = useState<number[]>([]);
   const queryClient = useQueryClient();
   const flattenedCategories = flattenCategories(categories);
+
   React.useEffect(() => {
     if (!selectedCategory && flattenedCategories.length > 0) {
       setSelectedCategory(flattenedCategories[0].id.toString());
     }
   }, [flattenedCategories, selectedCategory]);
+
   React.useEffect(() => {
     setSelectedAttributes([]);
   }, [selectedCategory]);
 
   const getSelectedCategory = async (id: string) => {
-    if (!id) return null;
-    const res = await clientSideFetch({
-      url: `/categories/attributes?category_id=${id}`,
-      method: "get",
-      toast: toast,
-    });
-    return res;
+    if (!id) {
+      console.log("No category ID provided");
+      return { data: { data: { data: [] } } }; // Return empty structure instead of null
+    }
+    try {
+      const res = await clientSideFetch({
+        url: `/categories/attributes?category_id=${id}`,
+        method: "get",
+        toast: toast,
+      });
+
+      console.log("API Response:", res);
+
+      // Ensure we always return a valid structure
+      if (!res || res === null || res === undefined) {
+        console.warn("API returned null/undefined, returning empty structure");
+        return { data: { data: { data: [] } } };
+      }
+
+      return res;
+    } catch (error) {
+      console.error("Error fetching category attributes:", error);
+      // Return empty structure instead of null on error
+      return { data: { data: { data: [] } } };
+    }
   };
 
-  const { data: attributesData, isLoading } = useQuery({
+  const {
+    data: attributesData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["selectedCategory", selectedCategory],
     queryFn: () => getSelectedCategory(selectedCategory),
     enabled: !!selectedCategory,
+    retry: 1,
+    staleTime: 30000, // 30 seconds
+    placeholderData: { data: { data: { data: [] } } }, // Provide placeholder data
   });
 
   const updateAttributeStatus = async (payload: {
@@ -143,19 +170,53 @@ const RootLayouts: React.FC<RootLayoutsProps> = ({ categories }) => {
   const statusMutation = useMutation({
     mutationFn: updateAttributeStatus,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["selectedCategory", selectedCategory],
+      // Set a timeout to allow the backend to process before refetching
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["selectedCategory", selectedCategory],
+        });
+      }, 500);
+    },
+    onError: (error) => {
+      console.error("Error updating attribute status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update attribute status",
+        variant: "destructive",
       });
     },
   });
 
   const reorderMutation = useMutation({
     mutationFn: reorderAttributes,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["selectedCategory", selectedCategory],
+    onSuccess: async (data) => {
+      console.log("Reorder success, response:", data);
+
+      toast({
+        title: "Success",
+        description: "Attributes reordered successfully",
       });
+
       setSelectedAttributes([]);
+
+      // Wait a bit before refetching to allow backend to update
+      setTimeout(async () => {
+        try {
+          await queryClient.refetchQueries({
+            queryKey: ["selectedCategory", selectedCategory],
+          });
+        } catch (error) {
+          console.error("Error refetching after reorder:", error);
+        }
+      }, 500);
+    },
+    onError: (error) => {
+      console.error("Error reordering attributes:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reorder attributes",
+        variant: "destructive",
+      });
     },
   });
 
@@ -196,7 +257,17 @@ const RootLayouts: React.FC<RootLayoutsProps> = ({ categories }) => {
 
   // Extract attributes from the response - handle the wrapped response structure
   const attributes = React.useMemo(() => {
-    if (!attributesData) return [];
+    console.log("Processing attributesData:", attributesData);
+
+    // Add comprehensive null/undefined check at the start
+    if (
+      !attributesData ||
+      attributesData === null ||
+      attributesData === undefined
+    ) {
+      console.log("attributesData is null/undefined");
+      return [];
+    }
 
     // Handle the wrapped response structure: data.data.data.data
     if (
@@ -205,6 +276,7 @@ const RootLayouts: React.FC<RootLayoutsProps> = ({ categories }) => {
       attributesData.data.data.data &&
       Array.isArray(attributesData.data.data.data)
     ) {
+      console.log("Found data at: data.data.data.data");
       return attributesData.data.data.data;
     }
 
@@ -214,14 +286,23 @@ const RootLayouts: React.FC<RootLayoutsProps> = ({ categories }) => {
       attributesData.data.data &&
       Array.isArray(attributesData.data.data)
     ) {
+      console.log("Found data at: data.data.data");
       return attributesData.data.data;
     }
 
     // Fallback: if the response is directly the data array
     if (Array.isArray(attributesData.data)) {
+      console.log("Found data at: data");
       return attributesData.data;
     }
 
+    // Fallback: if attributesData itself is an array
+    if (Array.isArray(attributesData)) {
+      console.log("attributesData itself is an array");
+      return attributesData;
+    }
+
+    console.log("No valid data structure found, returning empty array");
     return [];
   }, [attributesData]);
 
@@ -263,7 +344,15 @@ const RootLayouts: React.FC<RootLayoutsProps> = ({ categories }) => {
               </div>
             )}
 
-            {!isLoading && attributes.length > 0 && (
+            {isError && (
+              <div className="text-center py-4">
+                <p className="text-red-600">
+                  Error loading attributes. Please try again.
+                </p>
+              </div>
+            )}
+
+            {!isLoading && !isError && attributes.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">
@@ -315,61 +404,70 @@ const RootLayouts: React.FC<RootLayoutsProps> = ({ categories }) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody className="text-center">
-                    {attributes.map((attribute: RootDataData, index: number) => (
-                      <TableRow key={attribute.id} className="hover:bg-gray-50">
-                        <TableCell className="w-12">
-                          <div className="flex items-center justify-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedAttributes.includes(attribute.id)}
-                              onChange={() => handleCheckboxChange(attribute.id)}
-                              className="rounded-full h-4 w-4 cursor-pointer border-gray-300"
-                            />
-                            {selectedAttributes.includes(attribute.id) && (
-                              <span className="text-xs font-normal text-gray-400 h-2 w-2 rounded-full  text-center">
-                                {selectedAttributes.indexOf(attribute.id) + 1}
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium text-center">
-                          {attribute.attributeSet}
-                        </TableCell>
-                        <TableCell>{attribute.attributeName}</TableCell>
-                        <TableCell className="text-center">
-                          {attribute.sort_order}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center justify-center space-x-2">
-                            <Switch
-                              checked={attribute.is_active === 1}
-                              onCheckedChange={() =>
-                                handleStatusToggle(
-                                  attribute.id,
-                                  attribute.is_active
-                                )
-                              }
-                              disabled={statusMutation.isPending}
-                            />
-                            <span className="text-sm text-muted-foreground">
-                            
-                            </span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {attributes.map(
+                      (attribute: RootDataData, index: number) => (
+                        <TableRow
+                          key={attribute.id}
+                          className="hover:bg-gray-50"
+                        >
+                          <TableCell className="w-12">
+                            <div className="flex items-center justify-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedAttributes.includes(
+                                  attribute.id
+                                )}
+                                onChange={() =>
+                                  handleCheckboxChange(attribute.id)
+                                }
+                                className="rounded-full h-4 w-4 cursor-pointer border-gray-300"
+                              />
+                              {selectedAttributes.includes(attribute.id) && (
+                                <span className="text-xs font-normal text-gray-400 h-2 w-2 rounded-full text-center">
+                                  {selectedAttributes.indexOf(attribute.id) + 1}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-medium text-center">
+                            {attribute.attributeSet}
+                          </TableCell>
+                          <TableCell>{attribute.attributeName}</TableCell>
+                          <TableCell className="text-center">
+                            {attribute.sort_order}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center space-x-2">
+                              <Switch
+                                checked={attribute.is_active === 1}
+                                onCheckedChange={() =>
+                                  handleStatusToggle(
+                                    attribute.id,
+                                    attribute.is_active
+                                  )
+                                }
+                                disabled={statusMutation.isPending}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
                   </TableBody>
                 </Table>
               </div>
             )}
 
-            {!isLoading && attributes.length === 0 && selectedCategory && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No attributes found for this category.
-                </p>
-              </div>
-            )}
+            {!isLoading &&
+              !isError &&
+              attributes.length === 0 &&
+              selectedCategory && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    No attributes found for this category.
+                  </p>
+                </div>
+              )}
           </div>
         </CardContent>
       </Card>
