@@ -136,7 +136,9 @@ const FileMedia = ({
     setIsEditDialogOpen((prev) => !prev);
   };
 
-  const isVideo = (url) => url.toLowerCase().endsWith(".mp4");
+  const isVideo = (url) => {
+    return url && typeof url === "string" && url.toLowerCase().endsWith(".mp4");
+  };
   console.log("render data", renderData);
   return (
     <div className="grid grid-cols-6 gap-y-2 p-2   mt-4 mr-4   overflow-x-auto select-none h-[300px]  ">

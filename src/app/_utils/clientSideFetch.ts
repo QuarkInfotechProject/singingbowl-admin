@@ -1,9 +1,5 @@
 "use client";
 import axios from "axios";
-import crypto from "crypto";
-
-// This should be the same API_SECRET used on the server, stored securely
-const API_SECRET = process.env.NEXT_PUBLIC_API_SECRET;
 
 const clientSideFetch = async ({
   url,
@@ -19,27 +15,15 @@ const clientSideFetch = async ({
   body?: Record<string, any> | null;
   debug?: boolean;
   rawResponse?: boolean;
-  toast: any;
+  toast?: any;
   handleLoading?: (status: boolean) => void;
 }) => {
   console.log("body of request", body);
   try {
     // handleLoading && handleLoading(true);
 
-    // Generate request signature
-    const nonce = crypto.randomBytes(16).toString("hex");
-    const timestamp = Date.now();
-    const signature = crypto
-      .createHmac("sha256", API_SECRET)
-      .update(`${nonce}${timestamp}`)
-      .digest("hex");
-
     // Fetch the token
-    const tokenResponse = await axios.post("/api/getToken", {
-      nonce,
-      timestamp,
-      signature,
-    });
+    const tokenResponse = await axios.post("/api/getToken");
     const token = tokenResponse.data.token;
 
     if (!token) {
@@ -48,7 +32,7 @@ const clientSideFetch = async ({
 
     debug &&
       console.log(
-        "Consloe request sent to URL:",
+        "Console request sent to URL:",
         `${process.env.NEXT_PUBLIC_BASE_URL}${url}`
       );
 
@@ -83,24 +67,30 @@ const clientSideFetch = async ({
       };
     } else {
       debug && console.log("status not 200");
-      toast({
-        description: data.error ? data.error : "Unexpected Error",
-        variant: "destructive",
-      });
+      if (toast && typeof toast === "function") {
+        toast({
+          description: data.error ? data.error : "Unexpected Error",
+          variant: "destructive",
+        });
+      }
     }
   } catch (error) {
     debug && console.log("unexpected Data Fetching error", error);
     if (axios.isAxiosError(error)) {
-      toast({
-        description: error.response?.data?.message || error.message,
-        variant: "destructive",
-      });
+      if (toast && typeof toast === "function") {
+        toast({
+          description: error.response?.data?.message || error.message,
+          variant: "destructive",
+        });
+      }
     } else {
-      toast({
-        title: `Unexpected Error`,
-        description: `${error}`,
-        variant: "destructive",
-      });
+      if (toast && typeof toast === "function") {
+        toast({
+          title: `Unexpected Error`,
+          description: `${error}`,
+          variant: "destructive",
+        });
+      }
     }
   } finally {
     handleLoading && handleLoading(false);
