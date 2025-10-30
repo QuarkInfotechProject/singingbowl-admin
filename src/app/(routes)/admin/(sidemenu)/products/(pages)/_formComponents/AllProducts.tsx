@@ -44,6 +44,7 @@ interface ProductT {
   specialPrice: string;
   variantCount: number;
   files:
+    | string
     | [
         {
           imageUrl: string;
@@ -83,8 +84,11 @@ const AllProducts = ({
   const total = 8;
 
   // Determine if we should fetch from API
-  const shouldFetch = !defaultProduct || !Array.isArray(defaultProduct) || defaultProduct.length === 0;
-  
+  const shouldFetch =
+    !defaultProduct ||
+    !Array.isArray(defaultProduct) ||
+    defaultProduct.length === 0;
+
   // Fetch products using React Query
   const {
     data: fetchedProducts,
@@ -93,22 +97,36 @@ const AllProducts = ({
   } = useQuery({
     queryKey: ["products", "all"],
     queryFn: async () => {
-      const { data }: any = await clientSideFetch({
-        url: "/products?per_page=1000000",
-        method: "post",
-        body: {
-          status: "1",
-          name: "",
-          sku: "",
-          sortBy: "created_at",
-          sortDirection: "asc",
-        },
-        toast: "skip",
-      });
-      return Array.isArray(data.data.data) ? data.data.data : [];
+      try {
+        const response = await clientSideFetch({
+          url: "/products?per_page=1000000",
+          method: "post",
+          body: {
+            status: "1",
+            name: "",
+            sku: "",
+            sortBy: "created_at",
+            sortDirection: "asc",
+          },
+          toast: "skip",
+        });
+
+        // Handle undefined or null response
+        if (!response) {
+          console.error("clientSideFetch returned undefined");
+          return [];
+        }
+
+        const { data } = response as any;
+        return Array.isArray(data?.data?.data) ? data.data.data : [];
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        return [];
+      }
     },
-    enabled: shouldFetch, // Only fetch if no valid defaultProduct
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    enabled: shouldFetch,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
 
   // Use defaultProduct if available, otherwise use fetched data
@@ -121,9 +139,8 @@ const AllProducts = ({
 
   // Filter products based on search query
   const filteredProducts = useMemo(() => {
-    // Ensure products is always an array
     const safeProducts = Array.isArray(products) ? products : [];
-    
+
     if (!searchQuery.trim()) {
       return safeProducts;
     }
@@ -133,7 +150,7 @@ const AllProducts = ({
     );
   }, [products, searchQuery]);
 
-  // Loading state should consider both fetch loading and whether we have any data
+  // Loading state
   const isLoading = shouldFetch && isProductsLoading;
 
   // Handle error from React Query
@@ -146,6 +163,17 @@ const AllProducts = ({
       });
     }
   }, [error, toast]);
+
+  // Helper function to get image URL from files
+  const getImageUrl = (files: ProductT["files"]): string => {
+    if (typeof files === "string") {
+      return files;
+    }
+    if (Array.isArray(files) && files.length > 0 && files[0]?.imageUrl) {
+      return files[0].imageUrl;
+    }
+    return "";
+  };
 
   const handleProducts = (id: string, thumbnailUrl: string) => {
     const existsThumbnail = localProductThumbnails.includes(thumbnailUrl);
@@ -228,8 +256,9 @@ const AllProducts = ({
             </div>
             {searchQuery && (
               <p className="text-sm text-gray-600 mt-2">
-                Found {Array.isArray(filteredProducts) ? filteredProducts.length : 0} product(s) matching "
-                {searchQuery}"
+                Found{" "}
+                {Array.isArray(filteredProducts) ? filteredProducts.length : 0}{" "}
+                product(s) matching "{searchQuery}"
               </p>
             )}
           </div>
@@ -260,67 +289,35 @@ const AllProducts = ({
                     : ""
                 }`}
               >
-                {Array.isArray(filteredProducts) && filteredProducts.length > 0 ? (
+                {Array.isArray(filteredProducts) &&
+                filteredProducts.length > 0 ? (
                   filteredProducts.map((item: ProductT) => {
+                    const imageUrl = getImageUrl(item.files);
+                    const isDisabled =
+                      uploadedProducts?.includes(item.id.toString()) ||
+                      uploadedProducts?.length + localProductIds.length >=
+                        total ||
+                      localProductIds.includes(item.id.toString());
+
                     return (
                       <div
-                        className="flex flex-col group  hover:shadow-lg transition-all duration-200 bg-white rounded-lg border border-gray-200 overflow-hidden"
+                        className="flex flex-col group hover:shadow-lg transition-all duration-200 bg-white rounded-lg border border-gray-200 overflow-hidden"
                         key={item.id}
                       >
                         <div className="relative aspect-square">
-                          {item.variantCount !== 0 ? (
-                            <Image
-                              onClick={() =>
-                                handleProducts(
-                                  item.id.toString(),
-                                  item.files || ""
-                                )
-                              }
-                              src={item.files || ""}
-                              className={`w-full h-full cursor-pointer object-contain p-3 transition-transform duration-200 group-hover:scale-105 ${
-                                uploadedProducts?.includes(
-                                  item.id.toString()
-                                ) && "pointer-events-none"
-                              }  ${
-                                (uploadedProducts?.length +
-                                  localProductIds.length >=
-                                  total ||
-                                  localProductIds.includes(
-                                    item.id.toString()
-                                  )) &&
-                                "opacity-50 pointer-events-none"
-                              } `}
-                              height={200}
-                              width={200}
-                              alt={item.name}
-                            />
-                          ) : (
-                            <Image
-                              onClick={() =>
-                                handleProducts(
-                                  item.id.toString(),
-                                  item?.files[0]?.imageUrl || ""
-                                )
-                              }
-                              src={item.files?.[0]?.imageUrl || ""}
-                              className={`w-full h-full cursor-pointer object-contain p-3 transition-transform duration-200 group-hover:scale-105 ${
-                                uploadedProducts?.includes(
-                                  item.id.toString()
-                                ) && "pointer-events-none"
-                              }  ${
-                                (uploadedProducts?.length +
-                                  localProductIds.length >=
-                                  total ||
-                                  localProductIds.includes(
-                                    item.id.toString()
-                                  )) &&
-                                "opacity-50 pointer-events-none"
-                              } `}
-                              height={200}
-                              width={350}
-                              alt={item.name}
-                            />
-                          )}
+                          <Image
+                            onClick={() =>
+                              !isDisabled &&
+                              handleProducts(item.id.toString(), imageUrl)
+                            }
+                            src={imageUrl || "/images/placeholder.png"}
+                            className={`w-full h-full cursor-pointer object-contain p-3 transition-transform duration-200 group-hover:scale-105 ${
+                              isDisabled && "opacity-50 pointer-events-none"
+                            }`}
+                            height={200}
+                            width={200}
+                            alt={item.name}
+                          />
 
                           <div
                             className={`${
@@ -336,7 +333,7 @@ const AllProducts = ({
 
                           {localProductIds.includes(item.id.toString()) && (
                             <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
-                              <span className=" w-4 h-4 text-xs flex items-center justify-center font-bold">
+                              <span className="w-4 h-4 text-xs flex items-center justify-center font-bold">
                                 ✓
                               </span>
                             </div>

@@ -684,7 +684,7 @@ const AddProduct = () => {
               <General clearErrors={clearErrors} form={form} />
               <GeneralSide form={form} />
             </div>
-            <div className="p-5 py-10 w-3/4 bg-violet-100 rounded">
+            {/* <div className="p-5 py-10 w-3/4 bg-violet-100 rounded">
               <div>
                 <FormField
                   control={form.control}
@@ -715,8 +715,8 @@ const AddProduct = () => {
                   )}
                 />
               </div>
-            </div>
-
+            </div> */}
+{/* 
             {hasVariant === 1 && (
               <RootVariant
                 form={form}
@@ -731,7 +731,7 @@ const AddProduct = () => {
                 setValueIndex={setValueIndex}
                 maxOptions={10} // Pass the new max options value
               />
-            )}
+            )} */}
 
             {hasVariant === 0 && (
               <div className="w-[90%]">

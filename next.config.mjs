@@ -12,11 +12,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "http",
-        hostname: "zolpa.api.quarkinfotech.com",
+        hostname: "api.singingbowlvillagenepal.com",
       },
       {
         protocol: "https",
-        hostname: "zolpa.api.quarkinfotech.com",
+        hostname: "api.singingbowlvillagenepal.com",
       },
       {
         protocol: 'https',

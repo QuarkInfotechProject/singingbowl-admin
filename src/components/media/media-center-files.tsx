@@ -4,11 +4,10 @@ import Image from "next/image";
 import { useMediaFilter } from "@/lib/context/media-filter-context";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "../ui/skeleton";
-import { File } from "@/app/_types/media_Types/file_Types/fileTypes";
 import Link from "next/link";
 import FilePopup from "./file-popup";
 import { useRouter, useSearchParams } from "next/navigation";
-import { IconLink, IconLoader2, IconTrash } from "@tabler/icons-react";
+import { IconLink, IconTrash } from "@tabler/icons-react";
 import FileCategories from "./file-categories";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -17,14 +16,30 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../ui/use-toast";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import FileUploader from "./file-upload-categories";
-// import { useToast } from "../ui/use-toast";
+
+// Define interface matching the API response
+interface ApiFile {
+  id: number;
+  filename: string;
+  width: number;
+  height: number;
+  imageurl: string;
+  thumbnailurl: string;
+}
+
+interface MediaCenterFilesProps {
+  activeButton: string;
+  setActiveButton: (value: string) => void;
+  showCategoryEditor: boolean;
+  setShowCategoryEditor: (value: boolean) => void;
+}
 
 function MediaCenterFiles({
   activeButton,
   setActiveButton,
   showCategoryEditor,
   setShowCategoryEditor,
-}: any) {
+}: MediaCenterFilesProps) {
   const { search, sortBy, category } = useMediaFilter();
   const searchParams = useSearchParams();
   const fileId = searchParams.get("file");
@@ -47,19 +62,18 @@ function MediaCenterFiles({
       grouped: groupedData,
       fileCategoryId: category === "all" ? "" : category,
       fileName: search,
-      sortBy: sortField || "", // Default sort field
-      sortDirection: sortDirection || "", // Default sort direction
+      sortBy: sortField || "",
+      sortDirection: sortDirection || "",
     });
 
-    setTotalPages(data.data?.last_page);
-    // console.log("API response:asd", data.data);
-    return data?.data?.data;
+    setTotalPages(data.data?.last_page || 1);
+    return data?.data?.data || [];
   }, [page, search, sortBy, category, groupedData]);
 
-  const { data, isFetching, refetch } = useQuery<File[]>({
+  const { data, isFetching, refetch } = useQuery<ApiFile[]>({
     queryKey: ["file-selector", search, sortBy, category, page],
     queryFn: fetchMedia,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // Replaced keepPreviousData
   });
 
   useEffect(() => {
@@ -67,14 +81,13 @@ function MediaCenterFiles({
   }, [page, refetch]);
 
   const handlePrevious = () => {
-    setPage((prev) => Math.max(prev - 1, 1)); // Ensure the page does not go below 1
+    setPage((prev) => Math.max(prev - 1, 1));
   };
 
   const handleNext = () => {
-    setPage((prev) => Math.min(prev + 1, totalPages)); // Ensure the page does not exceed totalPages
+    setPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  console.log("fileaoipsdfjpisaod", fileId);
   const handleSelect = (fileId: string, isSelected: boolean) => {
     if (isSelected) {
       setSelectedFiles([...selectedFiles, fileId]);
@@ -82,9 +95,10 @@ function MediaCenterFiles({
       setSelectedFiles(selectedFiles.filter((id) => id !== fileId));
     }
   };
+
   const handleSelectAll = (checked: boolean) => {
     if (checked && data) {
-      setSelectedFiles(data.map((file) => file.id));
+      setSelectedFiles(data.map((file) => String(file.id)));
     } else {
       setSelectedFiles([]);
     }
@@ -117,8 +131,7 @@ function MediaCenterFiles({
       setIsDeleting(false);
     }
   };
-  console.log("select dfilesfor", selectedFiles);
-  console.log("caetgeoy is here", category);
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[300px_1fr] gap-4">
       <div className="hidden xl:block">
@@ -135,7 +148,7 @@ function MediaCenterFiles({
           <div className="flex items-center gap-2">
             <Checkbox
               checked={
-                data?.length === selectedFiles.length && data?.length > 0
+                data && data.length > 0 && data.length === selectedFiles.length
               }
               onCheckedChange={handleSelectAll}
             />
@@ -151,11 +164,7 @@ function MediaCenterFiles({
               disabled={isDeleting}
               className="flex items-center gap-2"
             >
-              {/* {isDeleting ? (
-                <IconLoader2 className="animate-spin" size={16} />
-              ) : ( */}
               <IconTrash size={16} />
-              {/* )} */}
               Delete Selected
             </Button>
           )}
@@ -175,30 +184,29 @@ function MediaCenterFiles({
             {!isFetching &&
               data &&
               data.map((file) => (
-                <div>
+                <div key={file.id}>
                   <FileCard
-                    key={file.id}
                     file={file}
-                    fileId={file.id}
-                    isSelected={selectedFiles.includes(file.id)}
+                    fileId={String(file.id)}
+                    isSelected={selectedFiles.includes(String(file.id))}
                     onSelect={handleSelect}
                     showDeleteIcon={selectedFiles.length > 0}
                   />
                 </div>
               ))}
             {isFetching && <LoadingSkeletions />}
-            {!isFetching && !data?.length && (
+            {!isFetching && (!data || data.length === 0) && (
               <p className="text-center col-span-5">No files found.</p>
             )}
           </div>
         </ScrollArea>
-        <div className="flex justify-end items-center  select-none">
+        <div className="flex justify-end items-center select-none">
           <nav
             className="isolate inline-flex -space-x-px rounded-md shadow-sm"
             aria-label="Pagination"
           >
-            <div
-              className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${
+            <button
+              className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
                 page === 1 ? "opacity-50 cursor-not-allowed" : ""
               }`}
               onClick={handlePrevious}
@@ -206,14 +214,14 @@ function MediaCenterFiles({
             >
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               <span className="">Prev</span>
-            </div>
+            </button>
 
-            <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900  ring-gray-300 focus:outline-offset-0">
+            <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-gray-300 focus:outline-offset-0">
               Page {page} of {totalPages}
             </span>
 
-            <div
-              className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${
+            <button
+              className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
                 page === totalPages ? "opacity-50 cursor-not-allowed" : ""
               }`}
               onClick={handleNext}
@@ -221,7 +229,7 @@ function MediaCenterFiles({
             >
               <span className="">Next</span>
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            </div>
+            </button>
           </nav>
         </div>
       </div>
@@ -255,12 +263,7 @@ function LoadingSkeletions() {
 }
 
 interface FileCardProps {
-  file: {
-    id: string;
-    fileName: string;
-    thumbnailUrl: string;
-    imageUrl: string;
-  };
+  file: ApiFile;
   fileId: string;
   isSelected: boolean;
   onSelect: (fileId: string, isSelected: boolean) => void;
@@ -274,50 +277,25 @@ function FileCard({
   onSelect,
   showDeleteIcon,
 }: FileCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  async function deleteFile() {
-    try {
-      setIsDeleting(true);
-      await axios.post("/api/files/destroy", {
-        id: [fileId],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["file-selector"],
-      });
-
-      toast({
-        description: "File has been deleted successfully.",
-        variant: "default",
-        className: "bg-green-600 text-white",
-      });
-    } catch (error) {
-      setIsDeleting(false);
-      toast({
-        description: "Failed to delete file",
-        variant: "destructive",
-      });
-    }
-  }
-
-  // Separate handler for checkbox click
   const handleCheckboxClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    // e.preventDefault();
-    // e.stopPropagation();
+    e.stopPropagation();
     onSelect(fileId, !isSelected);
   };
 
-  // Separate handler for checkbox container click
-  // const handleCheckboxContainerClick = (e: React.MouseEvent) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   onSelect(fileId, !isSelected);
-  // };
+  // Use the API field names (lowercase)
+  const thumbnailUrl = file.thumbnailurl || "";
+  const imageUrl = file.imageurl || "";
+  const fileName = file.filename || "";
 
   const isVideo =
-    file.thumbnailUrl.endsWith(".mp4") || file.thumbnailUrl.endsWith(".webm");
+    thumbnailUrl.toLowerCase().endsWith(".mp4") ||
+    thumbnailUrl.toLowerCase().endsWith(".webm") ||
+    imageUrl.toLowerCase().endsWith(".mp4") ||
+    imageUrl.toLowerCase().endsWith(".webm");
+  const isPdf = thumbnailUrl.toLowerCase().endsWith(".pdf");
 
   return (
     <div>
@@ -326,13 +304,12 @@ function FileCard({
           className={`absolute top-1 left-1 z-30 ${
             isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}
-          // onClick={handleCheckboxContainerClick}
         >
           <input
             type="checkbox"
             checked={isSelected}
             onClick={handleCheckboxClick}
-            onChange={() => {}} // Required to prevent React warning about controlled component
+            onChange={() => {}}
             className={`h-4 w-4 rounded cursor-pointer
             appearance-none border-2 border-red-600
             checked:bg-red-500 checked:border-red-500
@@ -371,7 +348,7 @@ function FileCard({
               autoPlay
               playsInline
             >
-              <source src={file.imageUrl} type="video/mp4" />
+              <source src={imageUrl} type="video/mp4" />
             </video>
           ) : (
             <Image
@@ -380,25 +357,31 @@ function FileCard({
               className="w-full h-auto object-contain select-none aspect-square bg-gradient-to-r from-slate-50 to-zinc-100 rounded-lg"
               draggable={false}
               src={
-                file.thumbnailUrl.endsWith(".pdf")
+                isPdf
                   ? "/images/placeholders/pdf.png"
-                  : file.thumbnailUrl
+                  : thumbnailUrl || "/images/placeholders/default.png"
               }
-              alt={file.fileName}
+              alt={fileName}
+              unoptimized={true}
             />
           )}
 
-          <h1 className="text-xs font-bold p-1">{file.fileName}</h1>
+          <h1 className="text-xs font-bold p-1 truncate" title={fileName}>
+            {fileName}
+          </h1>
         </Link>
 
-        <Link
-          className="border border-gray-300 rounded-full p-1 absolute top-1 right-1 z-10 text-black bg-white flex items-center justify-center"
-          target="_blank"
-          title={file.fileName}
-          href={file.imageUrl}
-        >
-          <IconLink stroke={1.5} size={20} />
-        </Link>
+        {imageUrl && (
+          <Link
+            className="border border-gray-300 rounded-full p-1 absolute top-1 right-1 z-10 text-black bg-white flex items-center justify-center hover:bg-gray-100"
+            target="_blank"
+            title={fileName}
+            href={imageUrl}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <IconLink stroke={1.5} size={20} />
+          </Link>
+        )}
       </div>
     </div>
   );
