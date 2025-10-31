@@ -733,7 +733,6 @@ const AddProduct = () => {
               />
             )} */}
 
-            {hasVariant === 0 && (
               <div className="w-[90%]">
                 <NoVariantsPricing form={form} />
                 <NoVariantsImages
@@ -744,8 +743,8 @@ const AddProduct = () => {
                   setIsColorImagesEditing={setIsColorImagesEditing}
                 />
               </div>
-            )}
-            {hasVariant === 1 &&
+            
+            {/* {hasVariant === 1 &&
               form.getValues("options.0.name") !== "Color" && (
                 <NoVariantsImages
                   setIsVariant={setIsVariant}
@@ -754,7 +753,7 @@ const AddProduct = () => {
                   form={form}
                   setIsColorImagesEditing={setIsColorImagesEditing}
                 />
-              )}
+              )} */}
             <div className="">
               <Meta form={form} />
               <NewAttr form={form} />

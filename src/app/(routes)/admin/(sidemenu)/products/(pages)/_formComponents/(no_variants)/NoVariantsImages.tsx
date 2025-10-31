@@ -18,7 +18,6 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { SheetTrigger } from "@/components/ui/sheet";
 import { DialogTrigger } from "@/components/ui/dialog";
 import { CiCirclePlus } from "react-icons/ci";
 import { X } from "lucide-react";
@@ -39,12 +38,12 @@ export interface Root {
 
 export interface RootBaseImage {
   id: number;
-  baseImageUrl: string;
+  baseImageurl: string;
 }
 
 export interface RootAdditionalImage {
   id: number;
-  additionalImageUrl: string;
+  additionalImageurl: string;
 }
 
 export interface RootDescriptionVideo {
@@ -82,7 +81,7 @@ const NoVariantsImages = ({
 
   // State for managing edits and URL mapping
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [imageUrlMap, setImageUrlMap] = useState<Record<number, string>>({});
+  const [imageurlMap, setImageurlMap] = useState<Record<number, string>>({});
   
   // Add a ref to track if we've initialized from defaultImages
   const initializedRef = useRef(false);
@@ -100,11 +99,11 @@ const NoVariantsImages = ({
       // Initialize base image
       if (
         defaultImages.baseImage?.id &&
-        defaultImages.baseImage?.baseImageUrl
+        defaultImages.baseImage?.baseImageurl
       ) {
         form.setValue("files.baseImage", defaultImages.baseImage.id);
         urlMap[defaultImages.baseImage.id] =
-          defaultImages.baseImage.baseImageUrl;
+          defaultImages.baseImage.baseImageurl;
       } else {
         form.setValue("files.baseImage", null);
       }
@@ -115,9 +114,9 @@ const NoVariantsImages = ({
         defaultImages.additionalImage.length > 0
       ) {
         const validAdditionalImages = defaultImages.additionalImage
-          .filter((item) => item?.id && item?.additionalImageUrl)
+          .filter((item) => item?.id && item?.additionalImageurl)
           .map((item) => {
-            urlMap[item.id] = item.additionalImageUrl;
+            urlMap[item.id] = item.additionalImageurl;
             return item.id;
           });
         form.setValue("files.additionalImage", validAdditionalImages);
@@ -143,7 +142,7 @@ const NoVariantsImages = ({
         form.setValue("files.descriptionVideo", "");
       }
 
-      setImageUrlMap(urlMap);
+      setImageurlMap(urlMap);
       initializedRef.current = true; // Mark as initialized
     };
 
@@ -154,7 +153,7 @@ const NoVariantsImages = ({
   const handleRemoveAdditionalImage = useCallback(
     (id: number) => {
       // Remove from URL map first to prevent fetching
-      setImageUrlMap((prev) => {
+      setImageurlMap((prev) => {
         const newMap = { ...prev };
         delete newMap[id];
         return newMap;
@@ -191,7 +190,7 @@ const NoVariantsImages = ({
 
       form.setValue("files.baseImage", numericId);
 
-      setImageUrlMap((prev) => {
+      setImageurlMap((prev) => {
         const newMap = { ...prev };
         if (oldId && oldId !== numericId) delete newMap[oldId];
         if (newUrl) newMap[numericId] = newUrl;
@@ -209,7 +208,7 @@ const NoVariantsImages = ({
 
       form.setValue("files.descriptionVideo", [numericId]);
 
-      setImageUrlMap((prev) => {
+      setImageurlMap((prev) => {
         const newMap = { ...prev };
         oldIds.forEach((oldId) => {
           if (oldId && oldId !== numericId) delete newMap[oldId];
@@ -237,7 +236,7 @@ const NoVariantsImages = ({
       form.setValue("files.additionalImage", updatedImages);
 
       if (newUrl) {
-        setImageUrlMap((prev) => ({
+        setImageurlMap((prev) => ({
           ...prev,
           [numericId]: newUrl,
         }));
@@ -257,7 +256,7 @@ const NoVariantsImages = ({
       updatedImages[index] = numericId;
       form.setValue("files.additionalImage", updatedImages);
 
-      setImageUrlMap((prev) => {
+      setImageurlMap((prev) => {
         const newMap = { ...prev };
         if (oldId && oldId !== numericId) delete newMap[oldId];
         if (newUrl) newMap[numericId] = newUrl;
@@ -299,17 +298,17 @@ const NoVariantsImages = ({
   // Image display component with URL fallback
   const ImageDisplay = useCallback(
     ({ id, className }: { id: number; className?: string }) => {
-      const imageUrl = imageUrlMap[id];
+      const imageurl = imageurlMap[id];
 
       // If we have a cached URL, use it
-      if (imageUrl) {
+      if (imageurl) {
         return (
           <img
-            src={imageUrl}
+            src={imageurl}
             alt="Product"
             className={className || "h-full w-full object-contain"}
             loading="lazy"
-            onError={() => console.warn(`Failed to load image: ${imageUrl}`)}
+            onError={() => console.warn(`Failed to load image: ${imageurl}`)}
           />
         );
       }
@@ -317,13 +316,13 @@ const NoVariantsImages = ({
       // For new images without cached URLs, fetch them
       return <FetchImage id={id.toString()} className={className} />;
     },
-    [imageUrlMap]
+    [imageurlMap]
   );
 
   // Video display component with URL fallback
   const VideoDisplay = useCallback(
     ({ id }: { id: number }) => {
-      const videoUrl = imageUrlMap[id];
+      const videoUrl = imageurlMap[id];
 
       // If we have a cached URL, use it
       if (videoUrl) {
@@ -339,7 +338,7 @@ const NoVariantsImages = ({
       // For new videos without cached URLs, fetch them
       return <FetchVideo id={id.toString()} />;
     },
-    [imageUrlMap]
+    [imageurlMap]
   );
 
   // Handle media library opening for different types

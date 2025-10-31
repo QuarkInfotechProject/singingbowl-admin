@@ -49,7 +49,8 @@ const FormSchema = z.object({
 });
 
 const RootLayout = () => {
-  const [isSheetsOpen, setIsSheetsOpen] = useState<boolean>(false);
+  const [isLogoDialogOpen, setIsLogoDialogOpen] = useState<boolean>(false);
+  const [isBannerDialogOpen, setIsBannerDialogOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedLogoPreview, setSelectedLogoPreview] = useState<{
     id: string;
@@ -84,9 +85,6 @@ const RootLayout = () => {
     },
   });
 
-  const toggleCreateDialog = () => {
-    setIsSheetsOpen(true);
-  };
 
   const handleLogoPreviewSelect = (imageId: any) => {
     if (!imageId || !imageId.id || !imageId.url) {
@@ -123,10 +121,27 @@ const RootLayout = () => {
     form.trigger("files.bannerImage");
   };
   const router = useRouter();
-  const onSubmit = async (formData: any) => {
-   
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
       setIsLoading(true);
+
+      // Transform the data to match API expectations
+      const formData = {
+        name: data.name,
+        status: data.status,
+        slug: data.slug,
+        files: {
+          logoImage: data.files.logoImage.id, // Send just the ID
+          bannerImage: data.files.bannerImage.id, // Send just the ID
+        },
+        meta: {
+          metaTitle: data.meta.metaTitle,
+          metaDescription: data.meta.metaDescription,
+        },
+      };
+
+      console.log("Transformed data being sent:", formData);
+
       const response = await clientSideFetch({
         url: "/brand/create",
         debug: true,
@@ -134,6 +149,7 @@ const RootLayout = () => {
         method: "post",
         body: formData,
       });
+
       if (response?.status === 200) {
         toast({
           description: response.data.message,
@@ -143,41 +159,12 @@ const RootLayout = () => {
         router.push("/admin/brand");
       }
     } catch (error) {
-      // if (axios.isAxiosError(error)) {
-      //   console.log("Axios error", error);
-      //   const errorMsg = error?.response?.data?.error;
-      //   const errorPassword = error.response?.data.errors?.type;
-      //   const errorDesktop = error.response?.data.errors?.files?.desktopImage;
-      //   const errorImages = error.response?.data.errors?.files?.mobileImage;
-      //   if (errorMsg) {
-      //     toast({
-      //       description: errorMsg,
-      //       variant: "destructive",
-      //       className: "bg-red-500 text-white",
-      //     });
-
-      //     // Set form field errors
-      //     form.setError("type", {
-      //       type: "manual",
-      //       message: errorPassword || "",
-      //     });
-      //     form.setError("files.desktopImage", {
-      //       type: "manual",
-      //       message: errorDesktop || "",
-      //     });
-      //     form.setError("files.mobileImage", {
-      //       type: "manual",
-      //       message: errorImages || "",
-      //     });
-      //   }
-      // } else {
       toast({
         title: "Unexpected Error",
         description: `${error}`,
         variant: "destructive",
         className: "bg-red-500 text-white",
       });
-      // }
     } finally {
       setIsLoading(false);
     }
@@ -189,7 +176,6 @@ const RootLayout = () => {
           <Button
             onClick={handleRouter}
             variant="outline"
-            size="xs"
             className="flex items-center justify-center p-1"
           >
             <IoIosArrowBack className="h-4 w-4" />
@@ -283,8 +269,6 @@ const RootLayout = () => {
               </div>
             </div>
 
-           
-
             <div>
               <FormField
                 control={form.control}
@@ -321,33 +305,34 @@ const RootLayout = () => {
                         </FormLabel>
                         <FormControl>
                           <Dialog
-                            isOpen={isSheetsOpen}
-                            onClose={() => setIsSheetsOpen(false)}
+                            open={isLogoDialogOpen}
+                            onOpenChange={setIsLogoDialogOpen}
                           >
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
-                                onClick={toggleCreateDialog}
                                 className="flex flex-row gap-2 px-1 py-1 h-8"
                               >
                                 <MdOutlineFileUpload />
                                 <span className="text-xs">Upload</span>
                               </Button>
                             </DialogTrigger>
-                            {isSheetsOpen && (
-                              <DialogContent className="max-w-[1350px] mx-auto h-[600px]">
-                                <Tabs
-                                  onLogoClick={handleLogoPreviewSelect}
-                                  setIsSheetOpen={setIsSheetsOpen}
-                                />
-                              </DialogContent>
-                            )}
+                            <DialogContent className="max-w-[1350px] mx-auto h-[600px]">
+                              <Tabs
+                                onLogoClick={handleLogoPreviewSelect}
+                                setIsSheetOpen={setIsLogoDialogOpen}
+                              />
+                            </DialogContent>
                           </Dialog>
                         </FormControl>
                       </div>
                       <div
                         className="mt-4 border-2 rounded-md p-2  "
-                        style={{ width: "150px", overflow:"hidden", height: "150px" }}
+                        style={{
+                          width: "150px",
+                          overflow: "hidden",
+                          height: "150px",
+                        }}
                       >
                         {" "}
                         {selectedLogoPreview && (
@@ -387,13 +372,12 @@ const RootLayout = () => {
                         </FormLabel>
                         <FormControl>
                           <Dialog
-                            isOpen={isSheetsOpen}
-                            onClose={() => setIsSheetsOpen(false)}
+                            open={isBannerDialogOpen}
+                            onOpenChange={setIsBannerDialogOpen}
                           >
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
-                                onClick={toggleCreateDialog}
                                 className="flex flex-row gap-2 px-1 py-1 h-8"
                               >
                                 <MdOutlineFileUpload />
@@ -401,20 +385,22 @@ const RootLayout = () => {
                               </Button>
                             </DialogTrigger>
 
-                            {isSheetsOpen && (
-                              <DialogContent className="max-w-[1350px] mx-auto h-[600px]">
-                                <Tabs
-                                  onLogoClick={handleBannerPreviewSelect}
-                                  setIsSheetOpen={setIsSheetsOpen}
-                                />
-                              </DialogContent>
-                            )}
+                            <DialogContent className="max-w-[1350px] mx-auto h-[600px]">
+                              <Tabs
+                                onLogoClick={handleBannerPreviewSelect}
+                                setIsSheetOpen={setIsBannerDialogOpen}
+                              />
+                            </DialogContent>
                           </Dialog>
                         </FormControl>
                       </div>
                       <div
                         className="mt-4 border-2 rounded-md p-2  "
-                        style={{ width: "150px", height: "150px" ,overflow:"hidden", }}
+                        style={{
+                          width: "150px",
+                          height: "150px",
+                          overflow: "hidden",
+                        }}
                       >
                         {" "}
                         {selectedBannerPreview && (
