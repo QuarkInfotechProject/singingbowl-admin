@@ -63,7 +63,7 @@ const FileMedia = ({
       const selectedItem = renderData?.find((item) => item.id === itemId); // Fixed: Added optional chaining
 
       if (selectedItem) {
-        handleImageClick(itemId, selectedItem.imageUrl || null);
+        handleImageClick(itemId, selectedItem.imageurl || null);
       }
     }
   };
@@ -147,7 +147,7 @@ const FileMedia = ({
               <div
                 className="relative "
                 onClick={() => {
-                  handleImageClick(item.id, item.imageUrl);
+                  handleImageClick(item.id, item.imageurl);
                   handleEditClick(item.id);
                 }}
               >
@@ -162,22 +162,22 @@ const FileMedia = ({
                     selectedImageId !== item.id ? "hidden" : ""
                   }`}
                 />
-                {isVideo(item.imageUrl) ? (
+                {isVideo(item.imageurl) ? (
                   <video
                     id={`video-${item.id}`}
                     className="w-full h-auto z-10 object-contain select-none aspect-square bg-gradient-to-r from-slate-50 to-zinc-100 rounded-sm"
-                    poster={item.thumbnailUrl}
+                    poster={item.thumbnailurl}
                     muted
                     autoPlay
                     loop
                     playsInline
                   >
-                    <source src={item.imageUrl} type="video/mp4" />
+                    <source src={item.imageurl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 ) : (
                   <Image
-                    src={item.thumbnailUrl}
+                    src={item.thumbnailurl}
                     alt="image"
                     width={200}
                     height={200}
@@ -189,7 +189,7 @@ const FileMedia = ({
                   <div className="flex items-center justify-center">
                     <button
                       className="text-white text-[13px] flex mt-20 items-center gap-3 px-3 py-1 rounded hover:bg-gray-950"
-                      onClick={() => handleCopyUrl(item.imageUrl)}
+                      onClick={() => handleCopyUrl(item.imageurl)}
                     >
                       <FaCopy />
                       Copy Url

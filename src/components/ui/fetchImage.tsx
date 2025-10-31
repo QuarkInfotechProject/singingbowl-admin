@@ -17,7 +17,7 @@ const FetchImage = ({
   width?: number;
   className?: string;
 }) => {
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageurl, setImageurl] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { toast } = useToast();
@@ -36,8 +36,10 @@ const FetchImage = ({
           toast,
         });
 
-        if (isMounted && data?.data?.thumbnailUrl) {
-          setImageUrl(data.data.thumbnailUrl);
+        if (isMounted && data?.data?.thumbnailurl) {
+          setImageurl(data.data.thumbnailurl);
+          console.log("FILE SHOW RESPONSE", data);
+
         } else if (isMounted) {
           setError(true);
         }
@@ -70,7 +72,7 @@ const FetchImage = ({
     );
   }
 
-  if (error || !imageUrl) {
+  if (error || !imageurl) {
     return (
       <div
         className={cn(
@@ -88,7 +90,7 @@ const FetchImage = ({
       height={height}
       width={width}
       alt="Thumbnail"
-      src={imageUrl}
+      src={imageurl}
       className={cn("object-contain", className)}
     />
   );

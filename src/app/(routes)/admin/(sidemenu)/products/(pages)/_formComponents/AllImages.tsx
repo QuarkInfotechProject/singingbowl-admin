@@ -37,8 +37,8 @@ interface ImageT {
   fileName: string;
   width: number;
   height: number;
-  imageUrl: string;
-  thumbnailUrl: string;
+  imageurl: string;
+  thumbnailurl: string;
 }
 
 export interface OptionValueT {
@@ -223,31 +223,31 @@ const AllImages = ({
   };
   const handleFiles = (
     id: string,
-    imageUrl: string,
+    imageurl: string,
     toUpdate: "base" | "additional" | "descriptions"
   ) => {
     if (toUpdate === "base") {
       setLocalBaseId(id);
-      setLocalBaseThumbnail(imageUrl);
+      setLocalBaseThumbnail(imageurl);
     } else if (toUpdate === "additional") {
-      const existsThumbnail = localAdditionalThumbnails.includes(imageUrl);
+      const existsThumbnail = localAdditionalThumbnails.includes(imageurl);
       const existsId = localAdditionalIds.includes(id);
 
       if (existsId && existsThumbnail) {
         return;
       }
 
-      setLocalAdditionalThumbnails([...localAdditionalThumbnails, imageUrl]);
+      setLocalAdditionalThumbnails([...localAdditionalThumbnails, imageurl]);
       setLocalAdditionalIds([...localAdditionalIds, id]);
     } else if (toUpdate === "descriptions") {
-      // const existsDescription = localDescriptionThumbnails.includes(imageUrl);
+      // const existsDescription = localDescriptionThumbnails.includes(imageurl);
       // const existsDescriptionId = localDescriptionIds.includes(id);
 
       // if (existsDescription && existsDescriptionId) {
       //   return;
       // }
 
-      setLocalDescriptionThumbnails(imageUrl);
+      setLocalDescriptionThumbnails(imageurl);
       setLocalDescriptionIds(id);
     }
   };
@@ -881,13 +881,14 @@ const SingleImage = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoKey, setVideoKey] = useState(0);
 
-  const isVideo = (url) => url.toLowerCase().endsWith(".mp4");
-  const isItemVideo = isVideo(item.imageUrl);
+  // Add null/undefined check
+  const isVideo = (url) => url?.toLowerCase().endsWith(".mp4") ?? false;
+  const isItemVideo = isVideo(item.imageurl);
 
   const handleImageClick = (e) => {
     e.preventDefault();
-    handleFiles(item.id.toString(), item.imageUrl, toUpdate);
-    setSelectedImage(item); // Set the selected image when clicked
+    handleFiles(item.id.toString(), item.imageurl, toUpdate);
+    setSelectedImage(item);
   };
 
   const handleVideoClick = (e) => {
@@ -907,16 +908,24 @@ const SingleImage = ({
     }
   };
 
+  // Early return if imageurl is missing
+  if (!item.imageurl) {
+    return (
+      <div className="flex flex-col">
+        <div className="w-full h-[100px] bg-gray-200 flex items-center justify-center rounded">
+          <p className="text-sm text-gray-500">No image available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div key={item.id} className="flex flex-col">
       <div className="relative">
-        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0   hover:opacity-100 hover:h-[100px] rounded-sm  ">
-          <div className="flex items-center justify-center  ">
-            <Link target="_blank" href={`${item.imageUrl}`}>
-              <button
-                className="text-white text-[13px] flex mt-16 items-center gap-3  px-3 py-1 rounded   hover:bg-gray-950 "
-                // onClick={() => handleCopyUrl(item.imageUrl)}
-              >
+        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 hover:h-[100px] rounded-sm">
+          <div className="flex items-center justify-center">
+            <Link target="_blank" href={`${item.imageurl}`}>
+              <button className="text-white text-[13px] flex mt-16 items-center gap-3 px-3 py-1 rounded hover:bg-gray-950">
                 <FaCopy />
                 Open Url
               </button>
@@ -929,7 +938,6 @@ const SingleImage = ({
           className="relative"
           onMouseEnter={() => setIsVideoHovered(true)}
           onMouseLeave={() => setIsVideoHovered(false)}
-          // onClick={() => handleFiles(item.id.toString(), item.thumbnailUrl, toUpdate)}
           onClick={handleImageClick}
         >
           {isItemVideo ? (
@@ -937,22 +945,20 @@ const SingleImage = ({
               <video
                 id={`video-${item.id}`}
                 className="w-full h-auto z-10 object-contain select-none aspect-square bg-gradient-to-r from-slate-50 to-zinc-100"
-                poster={item.imageUrl}
+                poster={item.imageurl}
                 muted
                 autoPlay
                 loop
                 playsInline
-                // defaultMuted
               >
-                <source src={item.imageUrl} type="video/mp4" />
+                <source src={item.imageurl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
           ) : (
-            /* Image */
             <div>
               <Image
-                src={item.imageUrl}
+                src={item.imageurl}
                 className={`w-full h-auto object-contain select-none aspect-square bg-gradient-to-r from-slate-50 to-zinc-100 ${
                   uploadedImages?.includes(item.id.toString()) &&
                   "pointer-events-none"
@@ -966,7 +972,7 @@ const SingleImage = ({
                 }`}
                 height={200}
                 width={200}
-                alt={item.fileName}
+                alt={item.fileName || "Image"}
               />
               <h1 className="text-xs font-bold p-1">{item.fileName}</h1>
             </div>
@@ -983,8 +989,7 @@ const SingleImage = ({
 
       {/* Filename */}
       <div>
-        <p className="text-xs px-1 overflow-x-hidden leading-tight text-center mt-1">
-        </p>
+        <p className="text-xs px-1 overflow-x-hidden leading-tight text-center mt-1"></p>
       </div>
     </div>
   );
