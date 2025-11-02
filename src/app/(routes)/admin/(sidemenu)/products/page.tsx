@@ -627,14 +627,14 @@ const UsersAndGroups = () => {
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
                                           className="cursor-pointer"
-                                          onClick={() => handleEdit(item.id)}
+                                          onClick={() => handleEdit(item.uuid)}
                                         >
                                           Edit
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           className="cursor-pointer"
                                           onClick={() =>
-                                            handleDeleteClick(item.id)
+                                            handleDeleteClick(item.uuid)
                                           }
                                         >
                                           Delete
@@ -643,7 +643,7 @@ const UsersAndGroups = () => {
                                     </DropdownMenu>
                                   </TableCell>
                                   <TableCell
-                                    onClick={() => handleClone(item.id)}
+                                    onClick={() => handleClone(item.uuid)}
                                     className="cursor-pointer group text-right"
                                   >
                                     <Copy

@@ -1,45 +1,4 @@
-// import { cookies } from "next/headers";
-// import RootLayout from "./RootLayout";
 
-// export default async function Page({ params }: { params: { uuid: string } }) {
-//   const cookieStore = cookies();
-//   const token = cookieStore.get("token")?.value;
-
-//   const { uuid } = params;
-//   let data = null;
-
-//   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/products/show/${uuid}`, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//     cache: "no-store", 
-//    });
-//   if (response.ok) {
-//     const res = await response.json();
-//     data = res.data?? null;
-//   }
-
-//   const getProducts= await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/products?per_page=1000000`,{
-//      method: "post",
-//         body: {
-//           status: "1",
-//           name: "",
-//           sku: "",
-//           sortBy: "created_at",
-//           sortDirection: "asc",
-//         },
-//         headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   })
-//   const defaultProduct=[]
-//   if(getProducts.ok){
-//     const product= await getProducts.json()
-//     defaultProduct=product.data.data
-//   }
-
-//   return <RootLayout defaultData={data} uuid={uuid} />;
-// }
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import RootLayout from "./RootLayout";
@@ -95,6 +54,7 @@ export default async function Page({ params }: { params: { uuid: string } }) {
     }
 
     const product = await getProducts.json();
+    console.log("prodcts are ?????????????????", product);
     defaultProduct = product.data?.data ?? [];
 
     // Only render RootLayout if both API calls were successful

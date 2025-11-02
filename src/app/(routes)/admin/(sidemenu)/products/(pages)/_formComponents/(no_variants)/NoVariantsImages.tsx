@@ -386,7 +386,7 @@ const NoVariantsImages = ({
             <div className="mt-4">
               <div className="mt-3">
                 <FormLabel className="font-normal">
-                  Featured Imagesssssss <span className="text-red-600">*</span>
+                  Featured Images <span className="text-red-600">*</span>
                 </FormLabel>
                 <FormDescription className="mt-1 text-sm">
                   It's the first and primary image that users see when viewing a

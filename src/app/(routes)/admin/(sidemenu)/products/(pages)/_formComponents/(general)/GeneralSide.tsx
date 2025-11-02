@@ -58,7 +58,7 @@ const GeneralSide = ({
     <div className="p-3">
       {/* Rest of your JSX code remains the same */}
       <div className="rounded pb-2">
-        <h2 className="font-medium">Categories, Tags and Status </h2>
+        <h2 className="font-medium">Categories and Status </h2>
       </div>
 
       {/* product status */}
@@ -161,7 +161,7 @@ const GeneralSide = ({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="tags"
           render={({ field }) => (
@@ -182,7 +182,7 @@ const GeneralSide = ({
               </div>
             </FormItem>
           )}
-        />
+        /> */}
       </div>
 
       {/* <div className="rounded p-5 mt-2 bg-white shadow-sm">

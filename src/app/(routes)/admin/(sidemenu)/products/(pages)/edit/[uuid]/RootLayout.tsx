@@ -650,6 +650,7 @@ const RootLayout = ({
       specifications: [],
     },
   });
+  console.log("uuid is : ", uuid)
   const { clearErrors } = form;
   const router = useRouter();
   const [productData, setProductData] = useState<SingleProductT | {}>({});
@@ -1015,7 +1016,7 @@ const RootLayout = ({
               >
                 <IoIosArrowBack className="h-4 w-4" />
               </Button>
-              <h1 className="text-xl font-bold">Update Products</h1>
+              <h1 className="text-xl font-bold">Updateeeeeeeeeee Products</h1>
             </div>
             <div></div>
           </div>
@@ -1051,58 +1052,13 @@ const RootLayout = ({
             <General clearErrors={clearErrors} form={form} />
             <GeneralSide form={form} />
           </div>
-          <div className="p-5 py-10 w-3/4 bg-violet-100 rounded">
-            <div>
-              <FormField
-                control={form.control}
-                name="hasVariant"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value === 1}
-                        onCheckedChange={(val) =>
-                          handleVariantReset(val ? 1 : 0)
-                        }
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Variations or other versions of this product available.
-                      </FormLabel>
-                      <FormDescription>
-                        Variation means a unique combination of attributes like
-                        color, size, material, storage capacity etc. for the
-                        same core product (e.g. a red cotton t-shirt in size
-                        large or a 256GB silver iPhone 14 Pro).
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
           <Dialog
             onOpenChange={() => {
               handleClearSelectedImages();
               handleFilterReset();
             }}
           >
-            {hasVariant === 1 && (
-              <RootVariant
-                form={form}
-                colorValues={colorValues}
-                setColorValues={setColorValues}
-                setIsVariant={setIsVariant}
-                setBaseOrAdditional={setBaseOrAdditional}
-                setUploadedImages={setUploadedImages}
-                isColorImagesEditing={isColorImagesEditing}
-                setIsColorImagesEditing={setIsColorImagesEditing}
-                valueIndex={valueIndex}
-                setValueIndex={setValueIndex}
-              />
-            )}
-
+           
             <AllImages
               inputValue={inputValue}
               setInputValue={setInputValue}
@@ -1133,40 +1089,17 @@ const RootLayout = ({
               valueIndex={valueIndex}
               setValueIndex={setValueIndex}
             />
-            {hasVariant === 0 && (
-              <div className="w-[90%]">
-                <NoVariantsPricing form={form} />
-                <NoVariantsImages
-                  setIsVariant={setIsVariant}
-                  setBaseOrAdditional={setBaseOrAdditional}
-                  setUploadedImages={setUploadedImages}
-                  form={form}
-                  defaultImages={defaultData.files ?? null}
-                  setIsColorImagesEditing={setIsColorImagesEditing}
-                />
-              </div>
-            )}
-            {hasVariant === 1 &&
-              form.getValues("options.0.name") !== "Color" && (
-                <NoVariantsImages
-                  setIsVariant={setIsVariant}
-                  setBaseOrAdditional={setBaseOrAdditional}
-                  setUploadedImages={setUploadedImages}
-                  form={form}
-                  setIsColorImagesEditing={setIsColorImagesEditing}
-                  defaultImages={defaultData.files ?? null}
-                />
-              )}
-            {hasVariant === 1 &&
-              form.getValues("options.0.name") == "Color" && (
-                <DescriptionVideo
-                  setIsVariant={setIsVariant}
-                  setBaseOrAdditional={setBaseOrAdditional}
-                  setUploadedImages={setUploadedImages}
-                  form={form}
-                  setIsColorImagesEditing={setIsColorImagesEditing}
-                />
-              )}
+            <div className="w-[90%]">
+              <NoVariantsPricing form={form} />
+              <NoVariantsImages
+                setIsVariant={setIsVariant}
+                setBaseOrAdditional={setBaseOrAdditional}
+                setUploadedImages={setUploadedImages}
+                form={form}
+                defaultImages={defaultData.files ?? null}
+                setIsColorImagesEditing={setIsColorImagesEditing}
+              />
+            </div>
           </Dialog>
 
           <div className="">
