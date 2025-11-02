@@ -117,7 +117,6 @@ const AllImages = ({
   };
 
   const handleTabChange = (index) => {
-    console.log("here tab index", index);
     setActiveTabIndex(index);
   };
   const handleIsCategoryLoading = (bool: boolean) => {

@@ -300,10 +300,7 @@ const NoVariantsImages = ({
   const ImageDisplay = useCallback(
     ({ id, className }: { id: number; className?: string }) => {
       const imageUrl = imageUrlMap[id];
-      console.log("id is ??????????????????/", id)
-      console.log("data mapped is ???????????????????", imageUrlMap)
-      console.log("url of image : ????????????????????", imageUrl);
-
+      
       // If we have a cached URL, use it
       if (imageUrl) {
         return (
@@ -376,7 +373,6 @@ const NoVariantsImages = ({
 
   // Watch form changes - remove this since we're using form.watch above
   // form.watch("files");
-  console.log("BaeImage???????????????????", baseImage);
   return (
     <div className="rounded bg-white p-5 mt-4">
       <h2 className="font-medium mb-4">Product Images</h2>

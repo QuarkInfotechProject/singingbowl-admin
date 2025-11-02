@@ -119,7 +119,6 @@ const FileMedia = ({
 
   const handleEditClick = (itemId: number) => {
     // Fixed: Added type
-    console.log("click edit");
     setSelectedFileId(itemId);
     editDialogRef.current = true;
     setIsEditDialogOpen((prev: boolean) => !prev); // Fixed: Added type
@@ -132,7 +131,6 @@ const FileMedia = ({
       : false;
   };
 
-  console.log("render data", renderData);
 
   return (
     <div className="grid grid-cols-6 gap-y-2 p-2 mt-4 mr-4 overflow-x-auto select-none h-[300px]">

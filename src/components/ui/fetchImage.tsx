@@ -38,7 +38,6 @@ const FetchImage = ({
 
         if (isMounted && data?.data?.thumbnailUrl) {
           setImageUrl(data.data.thumbnailUrl);
-          console.log("FILE SHOW RESPONSE", data);
 
         } else if (isMounted) {
           setError(true);
