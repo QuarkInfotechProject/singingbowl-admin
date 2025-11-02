@@ -293,7 +293,7 @@ const RootCreate = ({
                         Link
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="http://zolpa" {...field} />
+                        <Input placeholder="http://Singingbowl" {...field} />
                       </FormControl>
                       <FormDescription></FormDescription>
                       <FormMessage />

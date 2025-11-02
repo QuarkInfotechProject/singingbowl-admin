@@ -279,7 +279,7 @@ const RootCreate = ({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="http://zolpa.com/admin/contents..."
+                          placeholder="http://Singingbowl.com/admin/contents..."
                           {...field}
                         />
                       </FormControl>
@@ -303,11 +303,11 @@ const RootCreate = ({
                           {...field}
                           onChange={(e) => {
                             field.onChange(e);
-                            form.trigger("name"); 
+                            form.trigger("name");
                           }}
                           onBlur={() => {
                             field.onBlur();
-                            form.trigger("name"); 
+                            form.trigger("name");
                           }}
                         />
                       </FormControl>

@@ -19,16 +19,15 @@ const nextConfig = {
         hostname: "api.singingbowlvillagenepal.com",
       },
       {
-        protocol: 'https',
-        hostname: 'api.zolpastore.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "api.singingbowlvillagenepal.com",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'https://admin.zolpastore.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "https://admin.singingbowlvillagenepal.com",
+        pathname: "/**",
       },
-    
     ],
   },
 };

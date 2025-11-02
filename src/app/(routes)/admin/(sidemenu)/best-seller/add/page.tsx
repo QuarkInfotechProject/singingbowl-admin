@@ -271,7 +271,7 @@ const RootCreate = ({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="http://zolpa/admin/contents..."
+                          placeholder="http://Singingbowl/admin/contents..."
                           {...field}
                         />
                       </FormControl>

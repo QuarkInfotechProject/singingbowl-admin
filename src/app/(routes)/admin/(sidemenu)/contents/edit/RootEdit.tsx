@@ -406,7 +406,7 @@ const RootEdit = ({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="http://zolpa/admin/contents..."
+                          placeholder="http://Singingbowl/admin/contents..."
                           {...field}
                           defaultValue={editContentData?.data.link || ""}
                         />

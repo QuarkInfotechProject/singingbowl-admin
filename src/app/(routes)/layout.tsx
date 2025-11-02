@@ -6,11 +6,10 @@ import { Metadata } from "next";
 // import { ToastProvider } from "@/components/ui/toast"
 
 export const metadata: Metadata = {
-  title: "zolpa admin",
+  title: "Singing Bowl admin",
   robots: {
     index: false,
   },
-
 };
 
 

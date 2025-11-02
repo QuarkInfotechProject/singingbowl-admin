@@ -411,7 +411,7 @@ const CorporateOrder = ({
                           {item.productName}
                         </a>
                         <a
-                          href={`https://zolpastore.com/shop/detail/${item.url}`}
+                          href={`https://singingbowlvillagenepal.com/shop/detail/${item.url}`}
                           target="_blank"
                           className="text-sm text-blue-500 hover:underline"
                         >
