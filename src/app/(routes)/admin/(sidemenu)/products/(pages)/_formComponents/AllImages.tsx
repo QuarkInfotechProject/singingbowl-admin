@@ -8,8 +8,6 @@ import {
 } from "react";
 import { ChevronLeft, ChevronRight, Folder } from "lucide-react";
 import {
-  Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogClose,
@@ -30,15 +28,14 @@ import { FaCopy } from "react-icons/fa";
 import ImageEditSidebar from "./SideBar";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
-import { FaGalacticSenate } from "react-icons/fa6";
 
 interface ImageT {
   id: number;
   fileName: string;
   width: number;
   height: number;
-  imageurl: string;
-  thumbnailurl: string;
+  imageUrl: string;
+  thumbnailUrl: string;
 }
 
 export interface OptionValueT {
@@ -90,9 +87,7 @@ const AllImages = ({
   setInputValue,
   isVariant = false,
   isColorImagesEditing,
-  setIsColorImagesEditing,
   valueIndex,
-  setValueIndex,
 }: {
   inputValue: string;
   setInputValue: Dispatch<SetStateAction<string>>;
@@ -127,7 +122,6 @@ const AllImages = ({
   const [images, setImages] = useState<ImageT[] | []>([]);
   const [isImagesLoading, setIsImagesLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
-  // const [isCategoryLoading, setCategoryLoading] = useState(false)
   const [categories, setCategories] = useState<CategoryT[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -152,9 +146,7 @@ const AllImages = ({
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
   };
-  const handleIsCategoryLoading = (bool: boolean) => {
-    setIsImagesLoading(bool);
-  };
+
   const getSort = (option: SortOption | null) => {
     if (!option) {
       setFilters({
@@ -223,31 +215,31 @@ const AllImages = ({
   };
   const handleFiles = (
     id: string,
-    imageurl: string,
+    imageUrl: string,
     toUpdate: "base" | "additional" | "descriptions"
   ) => {
     if (toUpdate === "base") {
       setLocalBaseId(id);
-      setLocalBaseThumbnail(imageurl);
+      setLocalBaseThumbnail(imageUrl);
     } else if (toUpdate === "additional") {
-      const existsThumbnail = localAdditionalThumbnails.includes(imageurl);
+      const existsThumbnail = localAdditionalThumbnails.includes(imageUrl);
       const existsId = localAdditionalIds.includes(id);
 
       if (existsId && existsThumbnail) {
         return;
       }
 
-      setLocalAdditionalThumbnails([...localAdditionalThumbnails, imageurl]);
+      setLocalAdditionalThumbnails([...localAdditionalThumbnails, imageUrl]);
       setLocalAdditionalIds([...localAdditionalIds, id]);
     } else if (toUpdate === "descriptions") {
-      // const existsDescription = localDescriptionThumbnails.includes(imageurl);
+      // const existsDescription = localDescriptionThumbnails.includes(imageUrl);
       // const existsDescriptionId = localDescriptionIds.includes(id);
 
       // if (existsDescription && existsDescriptionId) {
       //   return;
       // }
 
-      setLocalDescriptionThumbnails(imageurl);
+      setLocalDescriptionThumbnails(imageUrl);
       setLocalDescriptionIds(id);
     }
   };
@@ -278,16 +270,7 @@ const AllImages = ({
     setLocalAdditionalThumbnails(updatedThumbnails);
   };
 
-  // const handleRemoves = (url: string) => {
-  //   const index = localDescriptionThumbnails.indexOf(url);
-  //   const updatedIds = localDescriptionIds.filter((_, idx) => idx !== index);
-  //   setLocalDescriptionIds(updatedIds);
-  //   const updatedThumbnails = localDescriptionThumbnails.filter(
-  //     (_, idx) => idx !== index
-  //   );
-  //   setLocalDescriptionThumbnails(updatedThumbnails);
-  // };
-  // alternate version of same functions for variants
+
   const handleConfirmUploadVariant = (
     toUpdate: "base" | "additional" | "descriptions"
   ) => {
@@ -444,26 +427,7 @@ const AllImages = ({
                           ))}
                         </select>
                       </div>
-                      {/* <div className="mx-auto">
-                        <Select
-                          defaultValue=""
-                          disabled={images.length <= 0}
-                          onValueChange={(val: "" | "asc" | "desc") =>
-                            setFilters({ ...filters, sortDirection: val })
-                          }
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Sort order" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="">Sort by</SelectItem>
-                              <SelectItem value="asc">Ascending</SelectItem>
-                              <SelectItem value="desc">Descending</SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div> */}
+                     
                     </div>
                   </DialogHeader>
                   <div className="grid gap-2 grid-cols-[15%_1fr]">
@@ -690,9 +654,7 @@ const AllImages = ({
                             </span>
                           ) : toUpdate === "descriptions" ? (
                             <span
-                            // className={`font-normal ${
-                            //   localDescriptionIds.length + uploadedImages.length === total && "text-green-600"
-                            // }`}
+                           
                             >
                               {localDescriptionIds?.length > 0 ? 1 : 0} / 1
                             </span>
@@ -731,13 +693,7 @@ const AllImages = ({
                                 />
                               )}
                             </div>
-                            // <Image
-                            //   className="h-[60px] w-[60px] object-contain"
-                            //   src={localBaseThumbnail}
-                            //   height={60}
-                            //   width={60}
-                            //   alt="base"
-                            // />
+                           
                           )}
                           {localAdditionalThumbnails.length > 0 && (
                             <div className="flex max-w-[900px] overflow-x-auto pb-4 gap-6 px-2">
@@ -810,17 +766,9 @@ const AllImages = ({
                                     className="w-full h-full object-cover"
                                   />
                                 )}
-                                {/* <button
-                  type="button"
-                  onClick={() => handleRemoves(url)}
-                  className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white rounded-full p-1 transition-colors duration-200"
-                  title="Remove"
-                >
-                  <X className="h-4 w-4" />
-                </button> */}
+                               
                               </div>
-                              {/* </div> */}
-                              {/* ))} */}
+                              
                             </div>
                           )}
                         </div>
@@ -883,11 +831,11 @@ const SingleImage = ({
 
   // Add null/undefined check
   const isVideo = (url) => url?.toLowerCase().endsWith(".mp4") ?? false;
-  const isItemVideo = isVideo(item.imageurl);
+  const isItemVideo = isVideo(item.imageUrl);
 
   const handleImageClick = (e) => {
     e.preventDefault();
-    handleFiles(item.id.toString(), item.imageurl, toUpdate);
+    handleFiles(item.id.toString(), item.imageUrl, toUpdate);
     setSelectedImage(item);
   };
 
@@ -908,8 +856,8 @@ const SingleImage = ({
     }
   };
 
-  // Early return if imageurl is missing
-  if (!item.imageurl) {
+  // Early return if imageUrl is missing
+  if (!item.imageUrl) {
     return (
       <div className="flex flex-col">
         <div className="w-full h-[100px] bg-gray-200 flex items-center justify-center rounded">
@@ -924,7 +872,7 @@ const SingleImage = ({
       <div className="relative">
         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 hover:h-[100px] rounded-sm">
           <div className="flex items-center justify-center">
-            <Link target="_blank" href={`${item.imageurl}`}>
+            <Link target="_blank" href={`${item.imageUrl}`}>
               <button className="text-white text-[13px] flex mt-16 items-center gap-3 px-3 py-1 rounded hover:bg-gray-950">
                 <FaCopy />
                 Open Url
@@ -945,20 +893,20 @@ const SingleImage = ({
               <video
                 id={`video-${item.id}`}
                 className="w-full h-auto z-10 object-contain select-none aspect-square bg-gradient-to-r from-slate-50 to-zinc-100"
-                poster={item.imageurl}
+                poster={item.imageUrl}
                 muted
                 autoPlay
                 loop
                 playsInline
               >
-                <source src={item.imageurl} type="video/mp4" />
+                <source src={item.imageUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
           ) : (
             <div>
               <Image
-                src={item.imageurl}
+                src={item.imageUrl}
                 className={`w-full h-auto object-contain select-none aspect-square bg-gradient-to-r from-slate-50 to-zinc-100 ${
                   uploadedImages?.includes(item.id.toString()) &&
                   "pointer-events-none"

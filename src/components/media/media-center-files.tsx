@@ -23,8 +23,8 @@ interface ApiFile {
   filename: string;
   width: number;
   height: number;
-  imageurl: string;
-  thumbnailurl: string;
+  imageUrl: string;
+  thumbnailUrl: string;
 }
 
 interface MediaCenterFilesProps {
@@ -286,8 +286,8 @@ function FileCard({
   };
 
   // Use the API field names (lowercase)
-  const thumbnailUrl = file.thumbnailurl || "";
-  const imageUrl = file.imageurl || "";
+  const thumbnailUrl = file.thumbnailUrl || "";
+  const imageUrl = file.imageUrl || "";
   const fileName = file.filename || "";
 
   const isVideo =

@@ -34,6 +34,7 @@ import axios from "axios";
 import KeySpaces from "../_formComponents/(keyspaces)/KeySpaces";
 import NewAttr from "../_formComponents/NewAttributes/NewAttr";
 import { transformOutgoingData } from "../edit/[uuid]/RootLayout";
+
 const optionValueSchema = z.object({
   optionName: z.string(),
   optionData: z.string().optional(),
@@ -164,12 +165,15 @@ const variantSchema = z
       path: ["specialPrice"],
     }
   );
+
 const variantsSchema = z.array(variantSchema);
+
 const metaSchema = z.object({
   metaTitle: z.string().optional(),
   keywords: z.array(z.string()).optional(),
   metaDescription: z.string().optional(),
 });
+
 const AttributeSchema = z.object({
   attributeId: z.string().optional(),
   values: z.union([z.number().array(), z.string().array()]),
@@ -179,12 +183,15 @@ const keySpaces = z.object({
   key: z.string().optional(),
   value: z.array(z.string()).optional(),
 });
+
 const keySpacesSchema = z.array(keySpaces).optional();
 const AttributesArraySchema = z.array(AttributeSchema);
+
 const specificationSchema = z.object({
   icon: z.string(),
   content: z.string(),
 });
+
 export const formSchema = z
   .object({
     productName: z
@@ -396,7 +403,7 @@ const AddProduct = () => {
     defaultValues: {
       productName: "",
       url: "",
-      brandId: null,
+      brandId: undefined,
       originalPrice: null,
       specialPrice: null,
       specialPriceStart: "",
@@ -449,6 +456,7 @@ const AddProduct = () => {
     formState: { errors },
     clearErrors,
   } = form;
+
   // Variants options building schemas
   const buildOptionValues = (variant: any) => {
     const optionValues: Record<string, string> = {};
@@ -482,14 +490,14 @@ const AddProduct = () => {
       brandId: Number(values.brandId),
       inStock: values?.hasVariant === 1 ? null : values?.inStock,
       variants: transformedVariants,
-       files:
-          values?.hasVariant === 1
-            ? {
-                baseImage: null,
-                additionalImage: [],
-                descriptionVideo: null,
-              }
-            : values.files,
+      files:
+        values?.hasVariant === 1
+          ? {
+              baseImage: null,
+              additionalImage: [],
+              descriptionVideo: null,
+            }
+          : values.files,
       options: transformOutgoingData(values.options),
     };
 
@@ -562,7 +570,7 @@ const AddProduct = () => {
         form.setValue("options", updatedOptions);
       }
     }
-  }, [hasVariantt]);
+  }, [hasVariantt, options, form]);
 
   const handleVariantReset = (val: any) => {
     // val is actually bool
@@ -580,15 +588,17 @@ const AddProduct = () => {
     });
     form.setValue("quantity", null);
     form.setValue("originalPrice", null);
-    form.setValue("sku", ""), form.setValue("variants", []);
-    form.setValue("specialPrice", null), form.setValue("specialPriceStart", "");
+    form.setValue("sku", "");
+    form.setValue("variants", []);
+    form.setValue("specialPrice", null);
+    form.setValue("specialPriceStart", "");
     form.setValue("specialPriceEnd", "");
     form.setValue("meta", {
       metaTitle: "",
       keywords: [],
       metaDescription: "",
-    }),
-      form.setValue("attributes", []);
+    });
+    form.setValue("attributes", []);
     form.setValue("relatedProducts", []);
     form.setValue("crossSells", []);
     form.setValue("couponId", []);
@@ -599,18 +609,22 @@ const AddProduct = () => {
     form.setValue("newFrom", "");
     form.setValue("newTo", "");
   };
+
   const hasVariant = useWatch({
     control: form.control,
     name: "hasVariant",
   });
+
   const handleRouter = () => {
     router.push("/admin/products");
   };
+
   const productName = useWatch({
     control: form.control,
     name: "productName",
     defaultValue: "",
   });
+
   useEffect(() => {
     const transformedUrl = productName
       .split(" ")
@@ -684,76 +698,18 @@ const AddProduct = () => {
               <General clearErrors={clearErrors} form={form} />
               <GeneralSide form={form} />
             </div>
-            {/* <div className="p-5 py-10 w-3/4 bg-violet-100 rounded">
-              <div>
-                <FormField
-                  control={form.control}
-                  name="hasVariant"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value === 1}
-                          onCheckedChange={(val) =>
-                            handleVariantReset(val ? 1 : 0)
-                          }
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          Variations or other versions of this product
-                          available.
-                        </FormLabel>
-                        <FormDescription>
-                          Variation means a unique combination of attributes
-                          like color, size, material, storage capacity etc. for
-                          the same core product (e.g. a red cotton t-shirt in
-                          size large or a 256GB silver iPhone 14 Pro).
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div> */}
-{/* 
-            {hasVariant === 1 && (
-              <RootVariant
-                form={form}
-                colorValues={colorValues}
-                setColorValues={setColorValues}
+
+            <div className="w-[90%]">
+              <NoVariantsPricing form={form} />
+              <NoVariantsImages
                 setIsVariant={setIsVariant}
                 setBaseOrAdditional={setBaseOrAdditional}
                 setUploadedImages={setUploadedImages}
-                isColorImagesEditing={isColorImagesEditing}
+                form={form}
                 setIsColorImagesEditing={setIsColorImagesEditing}
-                valueIndex={valueIndex}
-                setValueIndex={setValueIndex}
-                maxOptions={10} // Pass the new max options value
               />
-            )} */}
-
-              <div className="w-[90%]">
-                <NoVariantsPricing form={form} />
-                <NoVariantsImages
-                  setIsVariant={setIsVariant}
-                  setBaseOrAdditional={setBaseOrAdditional}
-                  setUploadedImages={setUploadedImages}
-                  form={form}
-                  setIsColorImagesEditing={setIsColorImagesEditing}
-                />
-              </div>
+            </div>
             
-            {/* {hasVariant === 1 &&
-              form.getValues("options.0.name") !== "Color" && (
-                <NoVariantsImages
-                  setIsVariant={setIsVariant}
-                  setBaseOrAdditional={setBaseOrAdditional}
-                  setUploadedImages={setUploadedImages}
-                  form={form}
-                  setIsColorImagesEditing={setIsColorImagesEditing}
-                />
-              )} */}
             <div className="">
               <Meta form={form} />
               <NewAttr form={form} />

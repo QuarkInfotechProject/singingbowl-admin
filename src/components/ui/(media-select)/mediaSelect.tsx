@@ -42,8 +42,8 @@ interface ImageT {
   fileName: string;
   width: number;
   height: number;
-  imageurl: string;
-  thumbnailurl: string;
+  imageUrl: string;
+  thumbnailUrl: string;
 }
 
 export interface OptionValueT {
@@ -183,25 +183,25 @@ const AllImages = ({
   };
   const handleFiles = (
     id: string,
-    imageurl: string,
+    imageUrl: string,
     toUpdate: "base" | "additional" | "descriptions"
   ) => {
     if (toUpdate === "base") {
       setLocalBaseId(id);
-      setLocalBaseThumbnail(imageurl);
-      setLocalBaseImage(imageurl);
+      setLocalBaseThumbnail(imageUrl);
+      setLocalBaseImage(imageUrl);
     } else if (toUpdate === "additional") {
-      const existsThumbnail = localAdditionalThumbnails.includes(imageurl);
+      const existsThumbnail = localAdditionalThumbnails.includes(imageUrl);
       const existsId = localAdditionalIds.includes(id);
 
       if (existsId && existsThumbnail) {
         return;
       }
 
-      setLocalAdditionalThumbnails([...localAdditionalThumbnails, imageurl]);
+      setLocalAdditionalThumbnails([...localAdditionalThumbnails, imageUrl]);
       setLocalAdditionalIds([...localAdditionalIds, id]);
     } else if (toUpdate === "descriptions") {
-      setLocalDescriptionThumbnails(imageurl);
+      setLocalDescriptionThumbnails(imageUrl);
       setLocalDescriptionIds(id);
     }
   };
@@ -736,11 +736,11 @@ const SingleImage = ({
   const [localItem, setLocalItem] = useState(item);
   const [isLoading, setIsLoading] = useState(false);
   const isVideo = (url) => url.toLowerCase().endsWith(".mp4");
-  const isItemVideo = isVideo(item.imageurl);
+  const isItemVideo = isVideo(item.imageUrl);
 
   const handleImageClick = (e) => {
     e.preventDefault();
-    handleFiles(item.id.toString(), item.imageurl, toUpdate);
+    handleFiles(item.id.toString(), item.imageUrl, toUpdate);
     setSelectedImage(item); // Set the selected image when clicked
   };
 
@@ -749,10 +749,10 @@ const SingleImage = ({
       <div className="relative">
         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0   hover:opacity-100 hover:h-[100px] rounded-sm  ">
           <div className="flex items-center justify-center  ">
-            <Link target="_blank" href={`${item.imageurl}`}>
+            <Link target="_blank" href={`${item.imageUrl}`}>
               <button
                 className="text-white text-[13px] flex mt-16 items-center gap-3  px-3 py-1 rounded   hover:bg-gray-950 "
-                // onClick={() => handleCopyUrl(item.imageurl)}
+                // onClick={() => handleCopyUrl(item.imageUrl)}
               >
                 <FaCopy />
                 Open Url
@@ -766,7 +766,7 @@ const SingleImage = ({
           className="relative"
           onMouseEnter={() => setIsVideoHovered(true)}
           onMouseLeave={() => setIsVideoHovered(false)}
-          // onClick={() => handleFiles(item.id.toString(), item.thumbnailurl, toUpdate)}
+          // onClick={() => handleFiles(item.id.toString(), item.thumbnailUrl, toUpdate)}
           onClick={handleImageClick}
         >
           {isItemVideo ? (
@@ -774,21 +774,21 @@ const SingleImage = ({
               <video
                 id={`video-${item.id}`}
                 className="w-[150px] h-[100px] object-cover rounded border"
-                poster={item.imageurl}
+                poster={item.imageUrl}
                 muted
                 autoPlay
                 loop
                 playsInline
                 // defaultMuted
               >
-                <source src={item.imageurl} type="video/mp4" />
+                <source src={item.imageUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
           ) : (
             /* Image */
             <Image
-              src={item.imageurl}
+              src={item.imageUrl}
               className={`items-center h-[100px] w-[100px] mx-auto justify-center border rounded-sm bg-gray-300 ${
                 uploadedImages?.includes(item.id.toString()) &&
                 "pointer-events-none"
