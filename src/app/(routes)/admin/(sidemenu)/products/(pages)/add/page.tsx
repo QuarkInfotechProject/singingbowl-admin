@@ -221,7 +221,7 @@ export const formSchema = z
     description: z
       .string()
       .min(1, { message: "Product's description is required" }),
-    // additionalDescription: z.string().nullable().optional(),
+    additionalDescription: z.string().nullable().optional(),
     saleStart: z.string().optional(),
     saleEnd: z.string().optional(),
     newFrom: z.string().optional(),
@@ -412,7 +412,7 @@ const AddProduct = () => {
       sku: "",
       bestSeller: 0,
       description: "",
-      // additionalDescription: "",
+      additionalDescription: "",
       hasVariant: 0,
       status: 1,
       saleEnd: "",
@@ -593,6 +593,8 @@ const AddProduct = () => {
     form.setValue("specialPrice", null);
     form.setValue("specialPriceStart", "");
     form.setValue("specialPriceEnd", "");
+      form.setValue("description", "");
+     form.setValue("additionalDescription", "");
     form.setValue("meta", {
       metaTitle: "",
       keywords: [],

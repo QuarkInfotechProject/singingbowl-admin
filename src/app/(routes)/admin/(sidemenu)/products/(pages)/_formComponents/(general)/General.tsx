@@ -73,10 +73,17 @@ const General = ({
     field.onChange(date.toISOString());
     return formattedDate;
   };
+
   const postDescription = useWatch({
     control: form.control,
     name: "description",
   });
+
+  const postAdditionalDescription = useWatch({
+    control: form.control,
+    name: "additionalDescription",
+  });
+
   return (
     <div className="bg-white rounded flex flex-col gap-y-5 p-5">
       <h2 className="font-medium mb-4">General Information</h2>
@@ -103,9 +110,6 @@ const General = ({
                   />
                 </FormControl>
                 <FormMessage className="font-normal mt-2" />
-                {/* <FormDescription className="mt-1 text-sm">
-                Name of your product.
-              </FormDescription> */}
               </div>
             </div>
           </FormItem>
@@ -124,15 +128,6 @@ const General = ({
               </div>
               <div>
                 <FormControl>
-                  {/* <Input
-                    className={
-                      form.formState.errors.url &&
-                      "border-red-600 focus:border-red-600"
-                    }
-                    placeholder=""
-                    defaultValue={defaultURL}
-                    {...field}
-                  /> */}
                   <Input
                     className={
                       form.formState.errors.url &&
@@ -153,16 +148,17 @@ const General = ({
           </FormItem>
         )}
       />
-      {/* Descreptions sections */}
+
+      {/* Description section */}
       <FormField
         control={form.control}
         name="description"
         render={({ field }) => (
           <FormItem>
-            <div className=" mt-4 gap-4 items-start justify-end">
+            <div className="mt-4 gap-4 items-start justify-end">
               <div className="mb-4 mt-10">
                 <FormLabel className="font-normal">
-                  Description<span className="text-red-600">*</span>
+                  HOW TO USE <span className="text-red-600">*</span>
                 </FormLabel>
                 <FormDescription className="mt-1 text-sm">
                   Enter a concise description of the product. This will be
@@ -171,9 +167,6 @@ const General = ({
                 </FormDescription>
               </div>
               <div>
-                {/* <FormControl>
-                  <Textarea className="h-[230px]" {...field} />
-                </FormControl> */}
                 <CkEditor
                   id="Product-description"
                   initialData={postDescription}
@@ -187,6 +180,37 @@ const General = ({
           </FormItem>
         )}
       />
+
+      {/* Additional Description section */}
+      <FormField
+        control={form.control}
+        name="additionalDescription"
+        render={({ field }) => (
+          <FormItem>
+            <div className="mt-4 gap-4 items-start justify-end">
+              <div className="mb-4 mt-10">
+                <FormLabel className="font-normal">QUALITY </FormLabel>
+                <FormDescription className="mt-1 text-sm">
+                  Enter additional information about the product. This section
+                  is optional and can contain extra details, specifications, or
+                  usage guidelines.
+                </FormDescription>
+              </div>
+              <div>
+                <CkEditor
+                  id="Product-additional-description"
+                  initialData={postAdditionalDescription}
+                  onChange={(content) => {
+                    form.setValue("additionalDescription", content || "");
+                  }}
+                />
+                <FormMessage className="font-normal mt-2" />
+              </div>
+            </div>
+          </FormItem>
+        )}
+      />
+
       <div className="rounded p-2 px-14 mt-7 bg-gray-100 shadow-sm">
         <FormField
           control={form.control}
@@ -207,7 +231,6 @@ const General = ({
                   }
                   onChange={(e) => {
                     const formattedDate = handleDateTimeChange(e, field);
-                    // If you need to store the API format separately
                     if (formattedDate) {
                       form.setValue("saleStart", formattedDate);
                     }
@@ -242,7 +265,6 @@ const General = ({
                   }
                   onChange={(e) => {
                     const formattedDate = handleDateTimeChange(e, field);
-                    // If you need to store the API format separately
                     if (formattedDate) {
                       form.setValue("saleEnd", formattedDate);
                     }
