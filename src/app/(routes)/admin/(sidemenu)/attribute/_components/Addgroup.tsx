@@ -36,7 +36,6 @@ const attributeFormSchema = z.object({
   attributeSetId: z.coerce
     .number()
     .min(1, { message: "Please select an attribute set" }),
-
   values: z
     .array(
       z.object({
@@ -45,130 +44,123 @@ const attributeFormSchema = z.object({
       })
     )
     .min(1, "At least one value is required"),
-  category_ids: z.array(z.number()).optional(),
-  is_enabled:z.number().optional(),
-  sort_order:z.number().optional()
+  category_ids: z.array(z.number()).optional().default([]),
+  is_enabled: z.union([z.number(), z.boolean()]).optional(),
+  sort_order: z.number().optional(),
 });
 
-// Infer the TypeScript type from the schema
 type AttributeFormValues = z.infer<typeof attributeFormSchema>;
 
 const UnifiedAttributeForm = ({
   params,
-  defaultValues,
+  initialData,
 }: {
   params: { id: string };
-  defaultValues?: AttributeFormValues | null;
+  initialData?: any;
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [tag, setTag] = useState<AttributeFormValues>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const context = useGlobalContext();
   const attributeContext = useAttributeContext();
 
-  // Initialize the form with react-hook-form and zod resolver
   const form = useForm<AttributeFormValues>({
     resolver: zodResolver(attributeFormSchema),
-    defaultValues: defaultValues || {
+    mode: "onBlur",
+    defaultValues: {
       attributeSetId: 0,
       name: "",
-      values: [],
+      values: [{ id: "", value: "" }],
       category_ids: [],
     },
   });
 
+  // Set form values when initialData is provided
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const res = await axios.get(`/api/attribute/specific/${params.id}`);
-        if (res.status === 200) {
-          const data = res.data.data || res.data;
-          setTag(data);
-          form.setValue("attributeSetId", Number(data.attributeSetId) || 0);
-          form.setValue("name", data.name || "");
-          form.setValue("category_ids", data.category_ids);
-          form.setValue("is_enabled",data.is_enabled)
-          form.setValue("sort_order",data.sort_order)
-          if (data.values?.length > 0) {
-            form.setValue(
-              "values",
-              data.values.map((value: any) => ({
+    if (initialData) {
+      form.reset({
+        attributeSetId: Number(initialData.attributeSetId) || 0,
+        name: initialData.name || "",
+        category_ids: initialData.category_ids || [],
+        is_enabled: initialData.is_enabled,
+        sort_order: initialData.sort_order,
+        values:
+          initialData.values?.length > 0
+            ? initialData.values.map((value: any) => ({
                 id: value.id?.toString() || "",
                 value: value.value || "",
               }))
-            );
-          } else {
-            form.setValue("values", [{ id: "", value: "" }]);
-          }
-          if (data.category_ids?.length > 0) {
-            form.setValue(
-              "category_ids",
-              data.category_ids.map((id: any) => Number(id))
-            );
-          }
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast({
-            description: error.response?.data?.message || error.message,
-            variant: "destructive",
-          });
-        }
-      }
-      setIsLoading(false);
-    };
-
-    fetchData();
-  }, [params.id]);
+            : [{ id: "", value: "" }],
+      });
+    }
+  }, [initialData, form]);
 
   const onSubmit = async (data: AttributeFormValues) => {
-    setIsLoading(true);
+    console.log("✅ onSubmit called with data:", data);
+    setIsSubmitting(true);
+
     try {
+      console.log("📝 Form data before submission:", data);
+
       const payload = {
-        ...data,
-        id: Number(params.id),
-        values: data.values.map((item) => item.value),
-        
+        id: params.id,
+        attributeSetId: data.attributeSetId.toString(),
+        name: data.name,
+        values: data.values.map((item) => ({
+          id: item.id || "",
+          value: item.value,
+        })),
+        category_ids: data.category_ids || [],
+        is_enabled: data.is_enabled,
+        sort_order: data.sort_order,
       };
 
+      console.log("📦 Payload being sent:", JSON.stringify(payload, null, 2));
+
       const res = await axios.post("/api/attribute/update", payload);
+
+      console.log("✅ Response from server:", res);
+
       if (res.status === 200) {
+        console.log("✅ Success! Status 200");
         toast({
           description: res.data.message || "Attribute updated successfully",
           variant: "default",
           className: "bg-green-500 text-white",
         });
+
+        if (context?.getData) {
+          console.log("Calling context.getData");
+          context.getData(1);
+        }
+
+        console.log("Redirecting to /admin/attribute");
         router.push("/admin/attribute");
-        context?.getData(1);
       }
     } catch (error) {
+      console.error("❌ Error submitting form:", error);
       if (axios.isAxiosError(error)) {
+        const errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message;
+        console.error("❌ API Error:", errorMessage);
+        console.error("❌ Full error response:", error.response?.data);
         toast({
-          description:
-            error.response?.data?.error ||
-            error.response?.data?.message ||
-            error.message,
+          description: errorMessage || "Failed to update attribute",
           variant: "destructive",
         });
       } else {
+        console.error("❌ Non-axios error:", error);
         toast({
           description: "An unexpected error occurred",
           variant: "destructive",
         });
       }
+    } finally {
+      console.log("🔚 Setting isSubmitting to false");
+      setIsSubmitting(false);
     }
-    setIsLoading(false);
-  };
-
-  const findDefaultName = () => {
-    if (!tag?.attributeSetId) return undefined;
-
-    // Handle attributeSetId as number
-    return attributeContext?.state.data.find(
-      (attribute) => Number(attribute.id) === Number(tag.attributeSetId)
-    )?.name;
   };
 
   const handleAddValue = () => {
@@ -193,7 +185,7 @@ const UnifiedAttributeForm = ({
     }
   };
 
-  if (isLoading && !tag) {
+  if (!initialData) {
     return (
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
@@ -216,7 +208,21 @@ const UnifiedAttributeForm = ({
       <CardHeader></CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              console.log("🔵 Form submit event triggered");
+              e.preventDefault();
+              const isValid = form.formState.isValid;
+              console.log("📋 Form is valid:", isValid);
+              console.log("📋 Form errors:", form.formState.errors);
+              if (!isValid) {
+                console.log("❌ Form validation failed");
+                return;
+              }
+              form.handleSubmit(onSubmit)(e);
+            }}
+            className="space-y-6"
+          >
             {/* Attribute Set Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
@@ -227,16 +233,10 @@ const UnifiedAttributeForm = ({
                     <FormLabel className="capitalize">Attribute Sets</FormLabel>
                     <Select
                       disabled={attributeContext?.state.loading}
-                      defaultValue={findDefaultName()}
+                      value={(field.value || 0).toString()}
                       onValueChange={(value) => {
-                        const selectedAttribute =
-                          attributeContext?.state.data.find(
-                            (attribute) => attribute.name === value
-                          );
-                        // Convert the ID to a number for the form schema
-                        field.onChange(
-                          parseInt(selectedAttribute?.id.toString(), 10) || 0
-                        );
+                        const numValue = parseInt(value, 10);
+                        field.onChange(numValue);
                       }}
                     >
                       <FormControl>
@@ -245,8 +245,11 @@ const UnifiedAttributeForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {attributeContext?.state.data.map((attribute) => (
-                          <SelectItem key={attribute.id} value={attribute.name}>
+                        {attributeContext?.state.data?.map((attribute: any) => (
+                          <SelectItem
+                            key={attribute.id}
+                            value={attribute.id.toString()}
+                          >
                             {attribute.name}
                           </SelectItem>
                         ))}
@@ -273,7 +276,7 @@ const UnifiedAttributeForm = ({
               />
             </div>
 
-            {/* URL Field - optional based on the API example */}
+            {/* Category Field */}
             <FormField
               control={form.control}
               name="category_ids"
@@ -340,14 +343,30 @@ const UnifiedAttributeForm = ({
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const values = form.getValues();
+                 
+                  // Try to trigger validation
+                  form.trigger().then((isValid) => {
+                    console.log("After trigger - Is Valid:", isValid);
+                  });
+                }}
+              >
+                Debug
+              </Button>
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="bg-[#5e72e4] hover:bg-[#465ad1]"
               >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Update
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {isSubmitting ? "Updating..." : "Update"}
               </Button>
             </div>
           </form>

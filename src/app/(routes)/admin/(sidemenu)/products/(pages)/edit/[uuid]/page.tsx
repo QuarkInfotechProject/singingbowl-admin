@@ -54,7 +54,6 @@ export default async function Page({ params }: { params: { uuid: string } }) {
     }
 
     const product = await getProducts.json();
-    console.log("prodcts are ?????????????????", product);
     defaultProduct = product.data?.data ?? [];
 
     // Only render RootLayout if both API calls were successful

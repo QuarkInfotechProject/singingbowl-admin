@@ -1016,7 +1016,7 @@ const RootLayout = ({
               >
                 <IoIosArrowBack className="h-4 w-4" />
               </Button>
-              <h1 className="text-xl font-bold">Updateeeeeeeeeee Products</h1>
+              <h1 className="text-xl font-bold">Update Products</h1>
             </div>
             <div></div>
           </div>
