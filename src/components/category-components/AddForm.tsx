@@ -39,8 +39,11 @@ const formSchema = z
     url: z.string().min(2, { message: "url is required" }),
     description: z.string().nullable(),
     files: z.object({
-      logo: z.string().optional(),
-      banner: z.string().optional(),
+      logo: z.number().optional(),
+      banner: z
+        .union([z.number(), z.literal("")])
+        .optional()
+        .default(""),
     }),
 
     status: z.boolean().default(false).optional(),
@@ -102,10 +105,10 @@ const AddForm = ({
   const [isSheetOpens, setIsSheetOpens] = useState(false);
 
   const [selectedPreviews, setSelectedPreviews] = useState<
-    { id: string; url: string }[]
+    { id: number; url: string }[]
   >([]);
   const [selectedPreviewMulti, setSelectedPreviewMulti] = useState<
-    { id: string; url: string }[]
+    { id: number; url: string }[]
   >([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -119,34 +122,42 @@ const AddForm = ({
       filterPriceMax: undefined,
       description: "",
       parentId: parentId?.toString() || "",
+      files: {
+        logo: undefined,
+        banner: "",
+      },
     },
     mode: "onChange",
   });
 
   const handlePreviewSelect = (imageId: any) => {
+    const numericId = Number(imageId.id);
+    form.setValue("files.banner", numericId);
     setFormData((prevFormData: any) => ({
       ...prevFormData,
       files: {
         ...prevFormData.files,
-        banner: imageId.id,
+        banner: numericId,
       },
     }));
-    setSelectedPreviewMulti([{ url: imageId.url, id: imageId.id }]);
+    setSelectedPreviewMulti([{ url: imageId.url, id: numericId }]);
   };
 
   const handlePreviewSelected = (imageId: any) => {
+    const numericId = Number(imageId.id);
+    form.setValue("files.logo", numericId);
     setFormData((prevFormData: any) => ({
       ...prevFormData,
       files: {
         ...prevFormData.files,
-        logo: imageId.id,
+        logo: numericId,
       },
     }));
 
-    setSelectedPreviews([{ url: imageId.url, id: imageId.id }]);
+    setSelectedPreviews([{ url: imageId.url, id: numericId }]);
   };
 
-  const handleRemoveImage = (idToRemove: string) => {
+  const handleRemoveImage = (idToRemove: number) => {
     const updatedPreviews = selectedPreviews.filter(
       (preview) => preview.id !== idToRemove
     );
@@ -154,7 +165,9 @@ const AddForm = ({
     const LogoId =
       updatedPreviews.length > 0
         ? updatedPreviews[updatedPreviews.length - 1].id
-        : "";
+        : undefined;
+
+    form.setValue("files.logo", LogoId);
     setFormData((prevFormData: any) => ({
       ...prevFormData,
       files: {
@@ -165,7 +178,7 @@ const AddForm = ({
     setSelectedPreviews(updatedPreviews);
   };
 
-  const handleRemoveImageMulti = (idToRemove: string) => {
+  const handleRemoveImageMulti = (idToRemove: number) => {
     const updatedPreviews = selectedPreviewMulti.filter(
       (preview) => preview.id !== idToRemove
     );
@@ -175,6 +188,7 @@ const AddForm = ({
         ? updatedPreviews[updatedPreviews.length - 1].id
         : "";
 
+    form.setValue("files.banner", bannerId);
     setFormData((prevFormData: any) => ({
       ...prevFormData,
       files: {
@@ -204,7 +218,7 @@ const AddForm = ({
           banner: watchedValues.files?.banner,
           logo: watchedValues.files?.logo,
         },
-        description:watchedValues.description,
+        description: watchedValues.description,
         parentId: parentId?.toString() || "",
       }));
     });

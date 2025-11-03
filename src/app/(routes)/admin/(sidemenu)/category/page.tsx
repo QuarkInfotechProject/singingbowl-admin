@@ -116,7 +116,6 @@ export default function RootLayout() {
       });
       const responseData = await res.json();
       setEditFormData(responseData.data);
-      console.log('herea for show categories', responseData.data);
       setShowAddForm(false);
       setISEditVisible(true);
       setShowEditForm(true);
