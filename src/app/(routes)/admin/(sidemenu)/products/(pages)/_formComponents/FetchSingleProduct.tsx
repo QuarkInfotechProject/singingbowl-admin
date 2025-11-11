@@ -116,11 +116,11 @@ const FetchSingleProduct = ({
         <div className="font-medium">{product && product.productName}</div>
         <div>
           {specialPrice && specialPrice !== null ? (
-            <del className="text-red-500 text-sm">Rs {originalPrice}</del>
+            <del className="text-red-500 text-sm">$ {originalPrice}</del>
           ) : (
-            <span>Rs {originalPrice}</span>
+            <span>$ {originalPrice}</span>
           )}
-          {specialPrice && <span className="ml-2">Rs {specialPrice}</span>}
+          {specialPrice && <span className="ml-2">$ {specialPrice}</span>}
         </div>
       </div>
     </div>

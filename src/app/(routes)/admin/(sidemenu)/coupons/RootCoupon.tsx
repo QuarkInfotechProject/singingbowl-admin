@@ -275,7 +275,7 @@ const RootCoupon = ({
                       {" "}
                       {item.isPercent
                         ? `${item.couponAmount}%`
-                        : `Rs ${item.couponAmount}`}
+                        : `$ ${item.couponAmount}`}
                     </TableCell>
 
                     <TableCell>

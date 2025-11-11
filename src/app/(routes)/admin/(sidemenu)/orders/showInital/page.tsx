@@ -320,7 +320,7 @@ const OrderPageView = (IdData: any) => {
                     <ColorCircle color={hashToColor(item?.optionData1)} />
                     {item?.optionValue1}
                   </span>
-                  <span className="font-medium">Rs {" "}{item?.lineTotal}</span>
+                  <span className="font-medium">$ {" "}{item?.lineTotal}</span>
                  </div>
                 </div>
               ))}
@@ -331,15 +331,15 @@ const OrderPageView = (IdData: any) => {
            <div className=" flex flex-col px-2">
            <div className="flex gap-x-24 ">
               <span>Subtotal:</span>
-              <span className="ml-auto">Rs {subtotal}</span>
+              <span className="ml-auto">$ {subtotal}</span>
             </div>
             <div className="flex  gap-x-24">
               <span>Discount:</span>
-              <span className="ml-auto">-Rs {discount}</span>
+              <span className="ml-auto">-$ {discount}</span>
             </div>
             <div className="flex  gap-x-24 font-semibold">
               <span>Total:</span>
-              <span className="ml-auto">Rs {total}</span>
+              <span className="ml-auto">$ {total}</span>
             </div>
            </div>
           </div>

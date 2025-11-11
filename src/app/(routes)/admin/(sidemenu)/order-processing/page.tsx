@@ -431,7 +431,7 @@ const TransactionPage = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="font-semibold">
-                        Rs{" "}
+                        ${" "}
                         {parseFloat(order.total).toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 3,

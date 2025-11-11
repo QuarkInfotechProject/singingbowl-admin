@@ -104,7 +104,7 @@ const RootAnalytics = ({
                         <p className="font-semibold text-black">
                           {isOrderChart
                             ? entry?.value
-                            : `Rs${" "}${
+                            : `$${" "}${
                                 entry?.value
                                   ? entry.value
                                       .toFixed(2)
@@ -209,7 +209,7 @@ const RootAnalytics = ({
             <p className="font-semibold text-xl">Total Sales</p>
             <div className="flex justify-between gap-x-4">
               <p className="whitespace-nowrap font-semibold">
-                Rs{" "}
+                ${" "}
                 {performanceData?.current?.sales?.totalSales?.toLocaleString()}
               </p>
 
@@ -267,7 +267,7 @@ const RootAnalytics = ({
             <p className="font-semibold text-xl">Net Sales</p>
             <div className="flex space-x-2">
               <p className="whitespace-nowrap font-semibold">
-                Rs {performanceData?.current?.sales?.netSales?.toLocaleString()}
+                $ {performanceData?.current?.sales?.netSales?.toLocaleString()}
               </p>
 
               <p
@@ -565,7 +565,7 @@ const RootAnalytics = ({
                   </div>
                   <p className="font-semibold">
                     {" "}
-                    Rs{" "}
+                    ${" "}
                     {performanceData?.current?.sales?.netSales?.toLocaleString()}
                   </p>
                 </div>
@@ -580,7 +580,7 @@ const RootAnalytics = ({
                   </div>
                   <p>
                     {" "}
-                    Rs{" "}
+                    ${" "}
                     {performanceData?.comparison?.sales?.netSales?.toLocaleString()}
                   </p>
                 </div>
@@ -704,7 +704,7 @@ const RootAnalytics = ({
                           {customer?.orders?.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-center">
-                          Rs {customer?.totalSpend?.toLocaleString()}
+                          $ {customer?.totalSpend?.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))
@@ -746,7 +746,7 @@ const RootAnalytics = ({
                           {coupons?.orders?.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-center">
-                          Rs {coupons?.amountDiscounted?.toLocaleString()}
+                          $ {coupons?.amountDiscounted?.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))
@@ -795,7 +795,7 @@ const RootAnalytics = ({
                           {categories?.itemsSold?.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-center">
-                          Rs {categories?.netSales?.toLocaleString()}
+                          $ {categories?.netSales?.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))
@@ -839,7 +839,7 @@ const RootAnalytics = ({
                           {products?.itemsSold?.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-center">
-                          Rs {products?.netSales?.toLocaleString()}
+                          $ {products?.netSales?.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))

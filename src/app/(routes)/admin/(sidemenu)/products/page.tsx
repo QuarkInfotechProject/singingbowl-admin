@@ -577,15 +577,15 @@ const UsersAndGroups = () => {
                                     {item.specialPrice ? (
                                       <div className="flex items-center space-x-2">
                                         <span className="font-semibold whitespace-nowrap">
-                                          Rs {item.specialPrice}
+                                          $ {item.specialPrice}
                                         </span>
                                         <span className="line-through whitespace-nowrap text-red-600 text-sm">
-                                          Rs {item.originalPrice}
+                                          $ {item.originalPrice}
                                         </span>
                                       </div>
                                     ) : (
                                       <span className="font-semibold whitespace-nowrap">
-                                        Rs {item.originalPrice}
+                                        $ {item.originalPrice}
                                       </span>
                                     )}
                                   </TableCell>

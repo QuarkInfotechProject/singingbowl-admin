@@ -372,14 +372,14 @@ const Root = ({
                   <TableCell className="px-6 py-3">{order.email}</TableCell>
                   <TableCell className="px-10 py-3">{order.orders}</TableCell>
                   <TableCell className="px-8 py-3 whitespace-nowrap">
-                    Rs{" "}
+                    ${" "}
                     {parseFloat(order.total).toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 3,
                     })}
                   </TableCell>
                   <TableCell className="px-6 py-3 whitespace-nowrap">
-                    Rs{" "}
+                    ${" "}
                     {parseFloat(order?.aov).toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 3,
@@ -493,7 +493,7 @@ const Root = ({
             </p>
             <p>
               <span className="font-bold space-x-1">
-                Rs{" "}
+                ${" "}
                 {TotalCustomers !== 0
                   ? averageLifetimeSpendSearch &&
                     !isNaN(averageLifetimeSpendSearch)
@@ -517,7 +517,7 @@ const Root = ({
             </p>
             <p>
               <span className="font-bold space-x-1">
-                Rs{" "}
+                ${" "}
                 {TotalCustomers !== 0
                   ? averageOrderValueSearch && !isNaN(averageOrderValueSearch)
                     ? averageOrderValueSearch.toLocaleString(undefined, {

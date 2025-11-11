@@ -937,14 +937,14 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      Rs{" "}
+                      ${" "}
                       {parseFloat(item.unitPrice).toLocaleString(undefined, {
                         maximumFractionDigits: 3,
                         minimumFractionDigits: 2,
                       })}
                     </TableCell>
                     <TableCell className="text-center ">
-                      Rs{" "}
+                      ${" "}
                       {parseFloat(item.lineTotal).toLocaleString(undefined, {
                         maximumFractionDigits: 3,
                         minimumFractionDigits: 2,
@@ -987,7 +987,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                             <p>
                               {cou.isPercent
                                 ? `${cou.value}%`
-                                : `Rs${cou.discountAmount}`}
+                                : `$${cou.discountAmount}`}
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -1008,7 +1008,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                         Subtotal:
                       </span>
                       <span className="font-bold text-xs ml-auto">
-                        Rs{" "}
+                        ${" "}
                         {parseFloat(subtotal).toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 3,
@@ -1022,7 +1022,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                         Discount:
                       </span>
                       <span className="text-red-600 text-xs font-bold ml-auto">
-                        - Rs{" "}
+                        - ${" "}
                         {parseFloat(discount)?.toLocaleString(undefined, {
                           maximumFractionDigits: 2,
                           maximumSignificantDigits: 3,
@@ -1036,7 +1036,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                         Total:
                       </span>
                       <span className="font-bold text-xs ml-auto">
-                        Rs{" "}
+                        ${" "}
                         {parseInt(total)?.toLocaleString(undefined, {
                           maximumFractionDigits: 2,
                           minimumFractionDigits: 2,
@@ -1051,7 +1051,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                           Paid
                         </span>
                         <span className="font-bold text-xs ml-auto">
-                          Rs{" "}
+                          ${" "}
                           {parseFloat(totalPaid)?.toLocaleString(undefined, {
                             maximumFractionDigits: 3,
                             minimumFractionDigits: 2,
@@ -1067,7 +1067,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                           Refunded:
                         </span>
                         <span className="font-bold text-xs text-red-500 ml-auto">
-                          - Rs{" "}
+                          - ${" "}
                           {parseFloat(refundedAmount)?.toLocaleString(
                             undefined,
                             {
@@ -1131,7 +1131,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                       </label>
                       <span className="font-bold text-red-500">
                         {" "}
-                        -Rs{" "}
+                        -${" "}
                         {parseFloat(refundedAmount)?.toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 3,
@@ -1146,7 +1146,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                         Total available to refund
                       </label>
                       <span className="font-bold">
-                        Rs{" "}
+                        ${" "}
                         {parseFloat(availableToRefund)?.toLocaleString(
                           undefined,
                           { minimumFractionDigits: 2, maximumFractionDigits: 3 }
@@ -1339,12 +1339,12 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                   </TooltipProvider>
                   <span className="px-1 pb-1"> :</span>
                 </strong>{" "}
-                Rs {userDetails.totalRevenue}
+               $ {userDetails.totalRevenue}
               </p>
               <p>
                 <strong>Average Order Value : </strong>
                 {"   "}
-                Rs {userDetails.averageOrderValue}
+               $ {userDetails.averageOrderValue}
               </p>
             </CardContent>
             {/* <CardFooter>
@@ -1434,7 +1434,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                         Amount:{" "}
                       </span>
                       <span className="text-orange-600 text-sm">
-                        Rs {parseFloat(refund.refundDetails.amount).toFixed(0)}
+                       $ {parseFloat(refund.refundDetails.amount).toFixed(0)}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
@@ -1461,7 +1461,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                               </span>
                             </p>
                             <p className="text-xs text-gray-500">
-                              Qty: {item.quantity} | Amount: Rs{" "}
+                              Qty: {item.quantity} | Amount: ${" "}
                               {parseFloat(item.amount).toFixed(0)}
                             </p>
                           </div>

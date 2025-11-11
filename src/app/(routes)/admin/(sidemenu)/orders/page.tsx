@@ -656,7 +656,7 @@ const OrderPage = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className="font-semibold cursor-pointer">
-                              Rs{" "}{item.total}
+                              ${" "}{item.total}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>

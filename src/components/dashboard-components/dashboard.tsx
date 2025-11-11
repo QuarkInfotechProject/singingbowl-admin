@@ -160,7 +160,7 @@ const Dashboard = ({
             <CardContent>
               <div className="text-2xl font-bold">
                 {item.name === "Revenue" || item.name === "Avg Order"
-                  ? "Rs "
+                  ? "$ "
                   : ""}
                 {item.name === "Orders"
                   ? isNaN(parseInt(item.value))
@@ -355,7 +355,7 @@ const Dashboard = ({
                     </TableCell>
 
                     <TableCell>
-                      Rs{" "}
+                      ${" "}
                       {parseInt(order.total).toLocaleString(undefined, {
                         maximumFractionDigits: 3,
                         minimumFractionDigits: 2,
