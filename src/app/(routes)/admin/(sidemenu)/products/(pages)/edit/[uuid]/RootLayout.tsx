@@ -622,6 +622,7 @@ const RootLayout = ({
 
       sku: "",
       description: "",
+      additionalDescription: "",
       hasVariant: 0,
       status: 1,
       // onSale: 0,
@@ -666,6 +667,7 @@ const RootLayout = ({
     form.setValue("url", editProduct?.url || " ");
     form.setValue("brandId", editProduct?.brandId);
     form.setValue("description", editProduct?.description || " ");
+    form.setValue("additionalDescription", editProduct?.additionalDescription || " ");
     form.setValue("bestSeller", editProduct?.bestSeller);
     form.setValue("keySpecs", editProduct?.keySpecs);
 

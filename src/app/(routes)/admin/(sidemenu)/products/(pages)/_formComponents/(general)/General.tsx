@@ -79,10 +79,15 @@ const General = ({
     name: "description",
   });
 
+  console.log("the description is :::::::::::::::::::::::::::::::::", postDescription)
   const postAdditionalDescription = useWatch({
     control: form.control,
     name: "additionalDescription",
   });
+    console.log(
+      "the Quality data is ::::::",    );
+
+    console.log("the Quality data is :::::::::::::::::::::::::::::::::", postAdditionalDescription)
 
   return (
     <div className="bg-white rounded flex flex-col gap-y-5 p-5">
@@ -198,7 +203,7 @@ const General = ({
               </div>
               <div>
                 <CkEditor
-                  id="Product-additional-description"
+                  id="Product-additional-description" 
                   initialData={postAdditionalDescription}
                   onChange={(content) => {
                     form.setValue("additionalDescription", content || "");

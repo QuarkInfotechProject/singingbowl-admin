@@ -32,6 +32,8 @@ export default async function Page({ params }: { params: { uuid: string } }) {
 
     const res = await response.json();
     data = res.data ?? null;
+    console.log("the uuid is:::::::::::::::::::", uuid)
+    console.log("the product detail data isssssssssssssssssssssssss:::::::::::::::::::", data)
 
     // Second API call - Get all products
     const getProducts = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/products?per_page=1000000`, {

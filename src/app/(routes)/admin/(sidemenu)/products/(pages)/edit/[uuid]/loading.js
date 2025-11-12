@@ -34,17 +34,6 @@ const loadding = () => {
             </div>
           </div>
 
-          {/* Variant Checkbox Section */}
-          <div className="p-5 py-10 w-3/4 bg-violet-100 rounded">
-            <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
-              <Skeleton className="h-4 w-4" /> {/* Checkbox */}
-              <div className="space-y-1">
-                <Skeleton className="h-5 w-96" /> {/* Label */}
-                <Skeleton className="h-16 w-full" /> {/* Description */}
-              </div>
-            </div>
-          </div>
-
           {/* Dialog Content Skeleton */}
           <div className="space-y-4">
             {/* Variant Options */}
