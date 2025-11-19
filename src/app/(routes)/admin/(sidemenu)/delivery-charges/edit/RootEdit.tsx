@@ -203,7 +203,7 @@ const RootDeliveryUpdate = ({
                       name="deliveryCharge"
                       render={({ field }) => (
                         <FormItem  className='mt-4'>
-                            <FormLabel>Delivery Charge <span className="ml-1">(Rs)</span></FormLabel>
+                            <FormLabel>Delivery Charge <span className="ml-1">($)</span></FormLabel>
                           <FormControl>
                             <Input
                              type='number'
@@ -225,7 +225,7 @@ const RootDeliveryUpdate = ({
                       name="additionalChargePerItem"
                       render={({ field }) => (
                         <FormItem className='mt-4'>
-                            <FormLabel>Additional Charge Per Item<span className="ml-1">(Rs)</span></FormLabel>
+                            <FormLabel>Additional Charge Per Item<span className="ml-1">($)</span></FormLabel>
                           <FormControl>
                             <Input
                             type='number'
@@ -248,7 +248,7 @@ const RootDeliveryUpdate = ({
                       name="weightBasedCharge"
                       render={({ field }) => (
                         <FormItem className='mt-4'>
-                            <FormLabel>Weight Based Charge<span className="ml-1">(Rs)</span></FormLabel>
+                            <FormLabel>Weight Based Charge<span className="ml-1">($)</span></FormLabel>
                           <FormControl>
                             <Input
                             type='number'

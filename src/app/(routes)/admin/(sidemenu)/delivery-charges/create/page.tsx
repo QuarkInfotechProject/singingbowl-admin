@@ -114,7 +114,7 @@ console.log(submitedValues);
               name="deliveryCharge"
               render={({ field }) => (
                 <FormItem >
-                  <FormLabel className="text-md ">Delivery Charge  <span className="ml-1">(Rs)</span> </FormLabel>
+                  <FormLabel className="text-md ">Delivery Charge  <span className="ml-1">($)</span> </FormLabel>
                   <FormControl>
                     <Input
                     type='number'
@@ -134,7 +134,7 @@ console.log(submitedValues);
               name="additionalChargePerItem"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-md">Additional Charge Per Item<span className="ml-1">(Rs)</span></FormLabel>
+                  <FormLabel className="text-md">Additional Charge Per Item<span className="ml-1">($)</span></FormLabel>
                   <FormControl>
                     <Input
                     type='number'
@@ -154,7 +154,7 @@ console.log(submitedValues);
               name="weightBasedCharge"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-md">Weight Based Charge<span className="ml-1">(Rs)</span></FormLabel>
+                  <FormLabel className="text-md">Weight Based Charge<span className="ml-1">($)</span></FormLabel>
                   <FormControl>
                     
                     <Input
