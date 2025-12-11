@@ -4,16 +4,11 @@ import { useEffect, useState } from "react";
 import EditDelivery from "./edit/page";
 import { clientSideFetch } from "@/app/_utils/clientSideFetch";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  DeliveryCharge,
-  DeliveryChargeResponse,
-} from "@/app/_types/deliver-Types/deliveryCharges";
+import { DeliveryCharge } from "@/app/_types/delivery-Types/deliveryCharges";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -23,31 +18,16 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { buttonVariants } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
-import { FaEdit, FaEye } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
-import Loading from "./loading";
 import AddDelivery from "./create/page";
 import { LuCircle } from "react-icons/lu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,8 +36,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -65,11 +43,11 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { BsThreeDots } from "react-icons/bs";
+
 const DeliveryChargesPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -79,8 +57,9 @@ const DeliveryChargesPage = () => {
   const [isSheetOpens, setIsSheetOpens] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   useEffect(() => {
-    const getTags = async () => {
+    const getDeliveryCharges = async () => {
       setLoading(true);
       try {
         const { data }: any = await clientSideFetch({
@@ -88,29 +67,25 @@ const DeliveryChargesPage = () => {
           method: "get",
           toast,
         });
-        const flatTags: DeliveryCharge[] = data.data;
-        console.log(flatTags);
-        setDeliveryData(flatTags);
-        setLoading(false);
+        const flatData: DeliveryCharge[] = data.data;
+        setDeliveryData(flatData);
       } catch (error) {
-        console.error("Error fetching attributes:", error);
         toast({
           title: "Error",
-          description: "Failed to fetch attributes",
+          description: "Failed to fetch delivery charges",
           variant: "destructive",
         });
       } finally {
         setLoading(false);
       }
     };
-    getTags();
+    getDeliveryCharges();
     setRefetch(false);
   }, [refetch]);
-  const onDelete = async (id: string) => {
+
+  const onDelete = async (id: number) => {
     setLoading(true);
-    const deleteData = {
-      id: id,
-    };
+    const deleteData = { id: id };
 
     try {
       const res = await fetch(`/api/delivery-charge`, {
@@ -120,12 +95,11 @@ const DeliveryChargesPage = () => {
 
       if (res.ok) {
         const data = await res.json();
-
         setRefetch(true);
         toast({ description: `${data.message}` });
       } else {
         toast({
-          description: "Failed to delete the category",
+          description: "Failed to delete the delivery charge",
           variant: "destructive",
         });
       }
@@ -139,10 +113,12 @@ const DeliveryChargesPage = () => {
       setLoading(false);
     }
   };
+
   const toggleCreateDialog = () => {
     setIsSheetOpen(true);
   };
-  const toggleCreateDialogs = (id: number) => {
+
+  const toggleEditDialog = (id: number) => {
     setSelectedItemId(id);
     setIsSheetOpens(true);
   };
@@ -151,20 +127,10 @@ const DeliveryChargesPage = () => {
     setSelectedItemId(id);
     setDeleteDialogOpen(true);
   };
+
   return (
     <div className="flex flex-col gap-4">
-      {/* {loading ? (Array(3).fill(null).map((_, index) => (
-                <TableRow key={index}>
-                  <TableCell><Skeleton className="w-32 h-6" /></TableCell>
-                  <TableCell><Skeleton className="w-20 h-6" /></TableCell>
-                  <TableCell className="flex gap-3 justify-center">
-                    <Skeleton className="w-8 h-8 rounded-full" />
-                    <Skeleton className="w-8 h-8 rounded-full" />
-                  </TableCell>
-                </TableRow>
-              ))) :( */}
-
-      <div className="flex flex-row justify-between  ">
+      <div className="flex flex-row justify-between">
         <div></div>
         <Dialog>
           <DialogTrigger asChild>
@@ -181,7 +147,7 @@ const DeliveryChargesPage = () => {
           </DialogTrigger>
 
           {isSheetOpen && (
-            <DialogContent className="max-w-[600px] h-[650px]">
+            <DialogContent className="max-w-[850px] h-auto max-h-[90vh]">
               <AddDelivery
                 setRefetch={setRefetch}
                 setIsSheetOpen={setIsSheetOpen}
@@ -190,6 +156,7 @@ const DeliveryChargesPage = () => {
           )}
         </Dialog>
       </div>
+
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Delivery Charges</CardTitle>
@@ -200,149 +167,114 @@ const DeliveryChargesPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Description</TableHead>
-                <TableHead className="text-center">Delivery charges</TableHead>
-
-                {/* <TableHead>Status</TableHead> */}
-                <th className="font-medium text-muted-foreground h-12 text-center ">
+                <TableHead>Country</TableHead>
+                <TableHead className="text-center">Delivery Charge</TableHead>
+                <TableHead className="text-center">Above 20kg</TableHead>
+                <TableHead className="text-center">Above 45kg</TableHead>
+                <TableHead className="text-center">Above 100kg</TableHead>
+                <th className="font-medium text-muted-foreground h-12 text-center">
                   Action
                 </th>
               </TableRow>
             </TableHeader>
-            {/* {orderData?.data.length > 0 ? ( */}
             <TableBody>
               {loading
-                ? // Render Skeleton Rows
-                  Array(3)
-                    .fill(null)
-                    .map((_, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <Skeleton className="w-32 h-6" />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Skeleton className="w-20 h-6 text-center" />
-                        </TableCell>
-                        <TableCell className="flex gap-3 text-center justify-center">
-                          <Skeleton className="w-8 h-8  rounded-md" />
-                          <Skeleton className="w-8 h-8 rounded-md" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                : deliveryData?.map((item: DeliveryCharge) => (
-                    <TableRow>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell className="text-center">{item.deliveryCharge}</TableCell>
-
-                      {/* <TableCell className={`${item.isActive === 1 ? 'text-green-600' : 'text-red-600'}`}><GoDotFill className='w-5 h-5' /></TableCell> */}
-
-                      <TableCell className="  flex gap-3  justify-center ">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <BsThreeDots />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => toggleCreateDialogs(item.id)}
-                            >
-                              Edit{" "}
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => handleDeleteClick(item.id)}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <Dialog
-                          open={isSheetOpens}
-                          onOpenChange={setIsSheetOpens}
-                        >
-                          {/* <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                        <DialogTrigger asChild>
-                          <a onClick={toggleCreateDialogs} className={buttonVariants({ variant: 'outline' })}>
-                            <FaEdit  className="text-blue-500 hover:text-blue-700 transition-colors duration-150"/>
-                          </a>
-                          </DialogTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider> */}
-
-                          {isSheetOpens && (
-                            <DialogContent className="max-w-[600px] h-[650px]">
-                              <EditDelivery
-                                dataId={item.id}
-                                setIsSheetOpens={setIsSheetOpens}
-                                setRefetch={setRefetch}
-                              />
-                            </DialogContent>
-                          )}
-                        </Dialog>
-                        <AlertDialog
-                          open={deleteDialogOpen}
-                          onOpenChange={setDeleteDialogOpen}
-                        >
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Are you sure you want to delete the data ?
-                              </AlertDialogTitle>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel
-                                className="bg-red-500 hover:bg-red-600 text-white hover:text-white"
-                                onClick={() => setDeleteDialogOpen(false)}
-                              >
-                                Cancel
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-[#5e72e4] hover:bg-[#465ad1]"
-                                onClick={() => {
-                                  if (selectedItemId) {
-                                    onDelete(selectedItemId);
-                                    setDeleteDialogOpen(false);
-                                  }
-                                }}
-                              >
-                                Continue
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-
-                          <AlertDialogTrigger>
-                            {/* <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div >
-                          <a  className={buttonVariants({ variant: 'outline' })}>
-                           <MdDelete className="h-4 w-4   text-red-500 hover:text-red-700 transition-colors duration-150" />
-                          </a>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider> */}
-                          </AlertDialogTrigger>
-                        </AlertDialog>
+                ? Array(3)
+                  .fill(null)
+                  .map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell><Skeleton className="w-32 h-6" /></TableCell>
+                      <TableCell><Skeleton className="w-24 h-6" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
+                      <TableCell className="flex gap-3 text-center justify-center">
+                        <Skeleton className="w-8 h-8 rounded-md" />
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ))
+                : deliveryData?.map((item: DeliveryCharge) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell>{item.country || '-'}</TableCell>
+                    <TableCell className="text-center">${item.deliveryCharge}</TableCell>
+                    <TableCell className="text-center">${item.chargeAbove20kg}</TableCell>
+                    <TableCell className="text-center">${item.chargeAbove45kg}</TableCell>
+                    <TableCell className="text-center">${item.chargeAbove100kg}</TableCell>
+                    <TableCell className="flex gap-3 justify-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <BsThreeDots />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => toggleEditDialog(item.id)}
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => handleDeleteClick(item.id)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <Dialog
+                        open={isSheetOpens && selectedItemId === item.id}
+                        onOpenChange={setIsSheetOpens}
+                      >
+                        {isSheetOpens && selectedItemId === item.id && (
+                          <DialogContent className="max-w-[850px] h-auto max-h-[90vh]">
+                            <EditDelivery
+                              dataId={item.id}
+                              setIsSheetOpens={setIsSheetOpens}
+                              setRefetch={setRefetch}
+                            />
+                          </DialogContent>
+                        )}
+                      </Dialog>
+
+                      <AlertDialog
+                        open={deleteDialogOpen && selectedItemId === item.id}
+                        onOpenChange={setDeleteDialogOpen}
+                      >
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you sure you want to delete this delivery charge?
+                            </AlertDialogTitle>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel
+                              className="bg-red-500 hover:bg-red-600 text-white hover:text-white"
+                              onClick={() => setDeleteDialogOpen(false)}
+                            >
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-[#5e72e4] hover:bg-[#465ad1]"
+                              onClick={() => {
+                                if (selectedItemId) {
+                                  onDelete(selectedItemId);
+                                  setDeleteDialogOpen(false);
+                                }
+                              }}
+                            >
+                              Continue
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
-            {/* ) : (
-        <div className="text-center py-4 text-lg mx-auto">No data available</div>
-      )} */}
           </Table>
         </CardContent>
       </Card>

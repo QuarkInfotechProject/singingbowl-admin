@@ -25,11 +25,21 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "https://admin.singingbowlvillagenepal.com",
+        hostname: "admin.singingbowlvillagenepal.com",
         pathname: "/**",
       },
     ],
   },
+  // Fix for Windows EPERM error during build
+  experimental: {
+    workerThreads: false,
+    cpus: 1
+  },
+  // Reduce webpack parallelism
+  webpack: (config, { isServer }) => {
+    config.parallelism = 1;
+    return config;
+  }
 };
 
 export default nextConfig;
