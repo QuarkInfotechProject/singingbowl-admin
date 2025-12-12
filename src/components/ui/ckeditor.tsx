@@ -53,7 +53,7 @@ import {
   Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { File } from "@/app/_types/media_Types/file_Types/fileTypes";
 // import MediaPopup from "./media/media-popup";
 
@@ -66,6 +66,7 @@ interface Props {
 function Editor({ id, onChange, initialData }: Props) {
   const editorRef = useRef<CKEditor<ClassicEditor>>(null);
   const mediaPopupRef = useRef<HTMLDivElement>(null);
+  const [isEditorReady, setIsEditorReady] = useState(false);
   const editorConfig = {
     toolbar: {
       items: [
@@ -184,6 +185,7 @@ function Editor({ id, onChange, initialData }: Props) {
         mediaPopupRef.current?.click();
       });
     }
+    setIsEditorReady(true);
   }
 
   function addImage(file: string) {
@@ -193,7 +195,15 @@ function Editor({ id, onChange, initialData }: Props) {
   }
 
   return (
-    <div id={id} className="[&_button]:hidden prose w-full max-w-full">
+    <div id={id} className="prose w-full max-w-full relative">
+      {!isEditorReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md min-h-[250px] z-10">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+            <span className="text-sm text-gray-500">Loading editor...</span>
+          </div>
+        </div>
+      )}
       <CKEditor
         ref={editorRef}
         editor={ClassicEditor}
@@ -210,3 +220,4 @@ function Editor({ id, onChange, initialData }: Props) {
 }
 
 export default Editor;
+

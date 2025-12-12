@@ -312,12 +312,12 @@ const transformIncomingData = (apiData: any) => {
       ...value,
       files: value.files
         ? {
-            ...value.files,
-            // Handle nullable images
-            baseImage: value.files.baseImage || null,
-            additionalImage: value.files.additionalImage || [],
-            descriptionVideo: value.files.descriptionVideo || null,
-          }
+          ...value.files,
+          // Handle nullable images
+          baseImage: value.files.baseImage || null,
+          additionalImage: value.files.additionalImage || [],
+          descriptionVideo: value.files.descriptionVideo || null,
+        }
         : null,
     })),
   }));
@@ -332,21 +332,21 @@ const transformOutgoingData = (formData: any) => {
       ...value,
       ...(option.isColor == 1 &&
         value.files && {
-          files: {
-            baseImage: value.files.baseImage
-              ? typeof value.files.baseImage === "object"
-                ? value.files.baseImage.id
-                : parseInt(value.files.baseImage) || null
-              : null,
-            additionalImage: (value.files.additionalImage || [])
-              .filter((img) => img !== null) // Filter out null values
-              .map((img: any) =>
-                typeof img === "object" ? img.id : parseInt(img) || null
-              )
-              .filter((id) => id !== null), // Filter out null IDs
-            descriptionVideo: value.files.descriptionVideo || "",
-          },
-        }),
+        files: {
+          baseImage: value.files.baseImage
+            ? typeof value.files.baseImage === "object"
+              ? value.files.baseImage.id
+              : parseInt(value.files.baseImage) || null
+            : null,
+          additionalImage: (value.files.additionalImage || [])
+            .filter((img) => img !== null) // Filter out null values
+            .map((img: any) =>
+              typeof img === "object" ? img.id : parseInt(img) || null
+            )
+            .filter((id) => id !== null), // Filter out null IDs
+          descriptionVideo: value.files.descriptionVideo || "",
+        },
+      }),
     })),
   }));
 };
@@ -425,6 +425,7 @@ export const formSchema = z
     categories: z.number().array().min(1, { message: "Category is required" }),
     tags: z.number().array().or(z.string().array()),
     quantity: z.coerce.number().optional(),
+    weight: z.coerce.number().optional(),
     files: z.object({
       baseImage: z.coerce.string().optional(),
       additionalImage: z.array(z.coerce.string()).optional(),
@@ -628,6 +629,7 @@ const RootLayout = ({
       // onSale: 0,
       inStock: 1,
       quantity: null,
+      weight: null,
       categories: [],
       tags: [],
       files: {
@@ -683,15 +685,16 @@ const RootLayout = ({
     form.setValue("inStock", editProduct?.inStock || 1);
     form.setValue("sku", editProduct?.sku || "");
     form.setValue("quantity", editProduct?.quantity || undefined);
+    form.setValue("weight", editProduct?.weight || null);
     form.setValue(
       "originalPrice",
       (editProduct?.originalPrice && parseFloat(editProduct.originalPrice)) ||
-        null
+      null
     );
     form.setValue(
       "specialPrice",
       (editProduct?.specialPrice && parseFloat(editProduct.specialPrice)) ||
-        null
+      null
     );
     form.setValue("specialPriceStart", editProduct?.specialPriceStart || "");
     form.setValue("specialPriceEnd", editProduct?.specialPriceEnd || "");
@@ -769,12 +772,12 @@ const RootLayout = ({
           optionData: value.optionData || "",
           ...(option.isColor == 1 &&
             value.files && {
-              files: {
-                baseImage: value.files.baseImage || null,
-                additionalImage: value.files.additionalImage || [],
-                descriptionVideo: value.files.descriptionVideo || [],
-              },
-            }),
+            files: {
+              baseImage: value.files.baseImage || null,
+              additionalImage: value.files.additionalImage || [],
+              descriptionVideo: value.files.descriptionVideo || [],
+            },
+          }),
         })),
       }));
       form.setValue("options", formattedOptions);
@@ -847,10 +850,10 @@ const RootLayout = ({
         files:
           formValues?.hasVariant === 1
             ? {
-                baseImage: null,
-                additionalImage: [],
-                descriptionVideo: null,
-              }
+              baseImage: null,
+              additionalImage: [],
+              descriptionVideo: null,
+            }
             : formValues.files,
         options: transformOutgoingData(formValues.options),
       };
@@ -1060,7 +1063,7 @@ const RootLayout = ({
               handleFilterReset();
             }}
           >
-           
+
             <AllImages
               inputValue={inputValue}
               setInputValue={setInputValue}

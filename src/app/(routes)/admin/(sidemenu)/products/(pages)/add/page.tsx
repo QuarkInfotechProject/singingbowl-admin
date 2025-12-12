@@ -232,6 +232,7 @@ export const formSchema = z
     categories: z.number().array().min(1, { message: "Category is required" }),
     tags: z.number().array().or(z.string().array()),
     quantity: z.coerce.number().nullable().optional(),
+    weight: z.coerce.number().nullable().optional(),
     files: z.object({
       baseImage: z.coerce.string().optional(),
       additionalImage: z.array(z.coerce.string()).optional(),
@@ -421,6 +422,7 @@ const AddProduct = () => {
       newTo: "",
       inStock: 1,
       quantity: 1,
+      weight: null,
       categories: [],
       tags: [],
       files: {
@@ -493,10 +495,10 @@ const AddProduct = () => {
       files:
         values?.hasVariant === 1
           ? {
-              baseImage: null,
-              additionalImage: [],
-              descriptionVideo: null,
-            }
+            baseImage: null,
+            additionalImage: [],
+            descriptionVideo: null,
+          }
           : values.files,
       options: transformOutgoingData(values.options),
     };
@@ -593,8 +595,8 @@ const AddProduct = () => {
     form.setValue("specialPrice", null);
     form.setValue("specialPriceStart", "");
     form.setValue("specialPriceEnd", "");
-      form.setValue("description", "");
-     form.setValue("additionalDescription", "");
+    form.setValue("description", "");
+    form.setValue("additionalDescription", "");
     form.setValue("meta", {
       metaTitle: "",
       keywords: [],
@@ -711,7 +713,7 @@ const AddProduct = () => {
                 setIsColorImagesEditing={setIsColorImagesEditing}
               />
             </div>
-            
+
             <div className="">
               <Meta form={form} />
               <NewAttr form={form} />

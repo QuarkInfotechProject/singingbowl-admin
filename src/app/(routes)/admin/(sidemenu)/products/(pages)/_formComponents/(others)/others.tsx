@@ -150,6 +150,7 @@ const Others = ({
             )}
           />
 
+          {/* HIDDEN: Active Offer - Uncomment when ready to use
           <FormField
             control={form.control}
             name="activeOfferId"
@@ -168,9 +169,11 @@ const Others = ({
               </FormItem>
             )}
           />
+          */}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* HIDDEN: Coupon - Uncomment when ready to use
           <FormField
             control={form.control}
             name="couponId"
@@ -189,6 +192,7 @@ const Others = ({
               </FormItem>
             )}
           />
+          */}
           <FormField
             control={form.control}
             name="specifications"
