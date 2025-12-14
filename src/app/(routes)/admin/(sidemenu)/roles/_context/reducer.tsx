@@ -3,43 +3,45 @@ import { InitialStateT } from "./context";
 // TYPE BEGINS
 export type ActionT =
   | {
-      type: "HANDLE_LOADING";
-      payload: { status: boolean };
-    }
+    type: "HANDLE_LOADING";
+    payload: { status: boolean };
+  }
   | {
-      type: "HANDLE_GROUP_NAME";
-      payload: { data: string };
-    }
+    type: "HANDLE_GROUP_NAME";
+    payload: { data: string };
+  }
   | {
-      type: "HANDLE_INITIAL_DATA";
-      payload: {
-        last_page: any;
-        current_page: any;
-        data: {
-          id: number;
-          name: string;
-          createdAt: string;
-        }[];
-      };
-    }
-  | {
-      type: "HANDLE_SINGLE_DATA";
-      payload: {
-        data: {
-          id: number;
-          name: string;
-          createdAt: string;
-        };
-      };
-    }
-  | {
-      type: "HANDLE_DELETE_DATA";
-      payload: { id: number };
-    }
-  | {
-      type: "HANDLE_EDIT_LOADING";
-      payload: { status: boolean };
+    type: "HANDLE_INITIAL_DATA";
+    payload: {
+      last_page: any;
+      current_page: any;
+      data: {
+        id: number;
+        uuid: string;
+        name: string;
+        createdAt: string;
+      }[];
     };
+  }
+  | {
+    type: "HANDLE_SINGLE_DATA";
+    payload: {
+      data: {
+        id: number;
+        uuid: string;
+        name: string;
+        createdAt: string;
+      };
+    };
+  }
+  | {
+    type: "HANDLE_DELETE_DATA";
+    payload: { id: number };
+  }
+  | {
+    type: "HANDLE_EDIT_LOADING";
+    payload: { status: boolean };
+  };
 
 // TYPEs END
 

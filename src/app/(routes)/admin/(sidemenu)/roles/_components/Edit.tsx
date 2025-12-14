@@ -9,16 +9,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
-import { AiOutlineLoading } from "react-icons/ai";
 import { useGlobalContext } from "../_context/context";
-import { FaEdit } from "react-icons/fa";
 import { BsExclamationSquareFill, BsThreeDots } from "react-icons/bs";
 
 import {
@@ -29,10 +26,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Trash } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -40,7 +35,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Permission } from "@/app/_types/module_Types/Module_Type";
-import { MdDelete } from "react-icons/md";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,12 +50,24 @@ type Inputs = {
   createdAt: string;
 };
 
+interface EditFormProps {
+  editData: {
+    id: number;
+    uuid: string;
+    name: string;
+    createdAt: string;
+  };
+  setEditDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  moduleData: Permission[];
+}
+
 export const Edit = ({
   editData,
   moduleData,
 }: {
   editData: {
     id: number;
+    uuid: string;
     name: string;
     createdAt: string;
   };
@@ -135,7 +141,7 @@ export const Edit = ({
   );
 };
 
-const EditForm = ({ editData, setEditDialogOpen, moduleData }: any) => {
+const EditForm = ({ editData, setEditDialogOpen, moduleData }: EditFormProps) => {
   const {
     handleSubmit,
     control,
@@ -164,7 +170,7 @@ const EditForm = ({ editData, setEditDialogOpen, moduleData }: any) => {
     }
   };
 
-  const handleSectionCheckboxToggle = (sectionId) => {
+  const handleSectionCheckboxToggle = (sectionId: string) => {
     const areAllPermissionsSelectedInSection = moduleData
       .filter((permission) => permission.section === sectionId)
       .every((permission) => selectedPermissions.includes(permission.id));
@@ -187,17 +193,18 @@ const EditForm = ({ editData, setEditDialogOpen, moduleData }: any) => {
     }
   };
 
-  const uniqueSections = [
+  const uniqueSections: string[] = [
     ...new Set(moduleData.map((permission) => permission.section)),
   ];
 
-  const getDatas = async (groupId: number) => {
+  const getDatas = async (groupUuid: string) => {
     try {
-      const res = await axios.get(`/api/roles/module/show?groupId=${groupId}`);
+      const res = await axios.get(`/api/roles/module/show?groupId=${groupUuid}`);
 
       const data = res.data;
 
-      setSelectedPermissions(data.data);
+      // Ensure we always set an array to prevent .includes() crash
+      setSelectedPermissions(Array.isArray(data.data) ? data.data : []);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast({
@@ -216,7 +223,7 @@ const EditForm = ({ editData, setEditDialogOpen, moduleData }: any) => {
   };
 
   useEffect(() => {
-    getDatas(editData.id);
+    getDatas(editData.uuid);
   }, []);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -291,9 +298,8 @@ const EditForm = ({ editData, setEditDialogOpen, moduleData }: any) => {
                 render={({ field }) => (
                   <Input
                     disabled={context?.state.editLoading}
-                    className={`${
-                      errors.groupName && "border-red-500"
-                    } col-span-3 w-72`}
+                    className={`${errors.groupName && "border-red-500"
+                      } col-span-3 w-72`}
                     id="name"
                     type="text"
                     {...field}
@@ -327,7 +333,7 @@ const EditForm = ({ editData, setEditDialogOpen, moduleData }: any) => {
                       <input
                         type="checkbox"
                         onChange={() => handlePermissionSelect(permission.id)}
-                        checked={selectedPermissions.includes(permission.id)}
+                        checked={selectedPermissions?.includes(permission.id) ?? false}
                       />
                       <label className="ml-1">{permission.name}</label>
                       <TooltipProvider>

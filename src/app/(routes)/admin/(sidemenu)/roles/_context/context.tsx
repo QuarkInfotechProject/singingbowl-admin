@@ -27,13 +27,15 @@ export interface InitialStateT {
   last_page: number;
   data: {
     id: number;
+    uuid: string;
     name: string;
     createdAt: string;
-   
+
   }[];
 
   singleData: {
     id: number;
+    uuid: string;
     name: string;
     createdAt: string;
   } | null;
@@ -142,7 +144,7 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     } catch (error) {
       console.error("Error occurred in deleteData function: ", error);
       dispatch({ type: 'HANDLE_LOADING', payload: { status: false } });
-  
+
       if (axios.isAxiosError(error)) {
         toast({
           description: error.response?.data?.message || error.message,
@@ -158,7 +160,7 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       }
     }
   };
-  
+
   const handleEditLoading = (status: boolean) => {
     dispatch({ type: 'HANDLE_EDIT_LOADING', payload: { status } });
   };
