@@ -3,7 +3,6 @@ name: 🚀 Deploy Singingbowlnepal Admin
 on:
   push:
     branches:
-      - main
       - master
 
 env:
@@ -11,7 +10,7 @@ env:
   SSH_USER: "ubuntu"
   SSH_PORT: "22"
   PROJECT_PATH: "/var/www/admin"
-  BRANCH: "main"
+  BRANCH: "master"
 
 jobs:
   deploy:
