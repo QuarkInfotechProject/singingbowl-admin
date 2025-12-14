@@ -1,143 +1,51 @@
-name: 🚀 Deploy to Production Server
+name: 🚀 Deploy Singingbowlnepal Admin
 
 on:
   push:
     branches:
       - master
 
+env:
+  SSH_HOST: "202.51.71.55"
+  SSH_USER: "ubuntu"
+  SSH_PORT: "22"
+  PROJECT_PATH: "/var/www/admin"
+  BRANCH: "master"
+
 jobs:
   deploy:
-    name: Deploy via SSH
     runs-on: ubuntu-latest
 
-    env:
-      DEBUG: false # Set to true for verbose SSH logging
-
     steps:
-      # ======================================================
-      # 1️⃣ CHECKOUT REPOSITORY
-      # ======================================================
-      - name: ⏳ Checkout Repository
-        uses: actions/checkout@v4
+      - name: 🛎 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🔐 SSH + Deploy
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          fetch-depth: 0 # Full history for clean git operations
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          port: ${{ env.SSH_PORT }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script_stop: true
+          envs: PROJECT_PATH,BRANCH
 
-      # ======================================================
-      # 2️⃣ SETUP NODE.JS + PNPM + CACHE
-      # ======================================================
-      - name: 🧰 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+          script: |
+            echo "🚀 Starting Admin deployment"
 
-      - name: ⚡ Cache PNPM Store
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+            echo "📁 Switching to project directory"
+            cd $PROJECT_PATH || { echo "❌ Directory not found"; exit 1; }
 
-      - name: 📦 Install PNPM
-        run: |
-          npm install -g pnpm
-          echo "✅ PNPM version: $(pnpm --version)"
+            echo "🔄 Pulling latest code"
+            git pull origin $BRANCH
 
-      # ======================================================
-      # 3️⃣ SETUP SSH
-      # ======================================================
-      - name: 🔐 Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SINGINGBOWL_SSH_PRIVATE_KEY }}
+            echo "📦 Installing dependencies (pnpm)"
+            pnpm install --frozen-lockfile || pnpm install
 
-      # ======================================================
-      # 4️⃣ DEPLOY TO VPS
-      # ======================================================
-      - name: 🚀 Deploy to VPS
-        env:
-          VPS_USER: ${{ secrets.SINGINGBOWL_USER }}
-          VPS_HOST: ${{ secrets.QUARK_VPS_HOST }}
-          VPS_PORT: ${{ secrets.QUARK_VPS_PORT }}
-          GIT_AUTH_TOKEN: ${{ secrets.GIT_AUTH_TOKEN }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          DEBUG: ${{ env.DEBUG }}
-          REPO_SLUG: ${{ github.repository }}
-        run: |
-          echo "🌍 Connecting to VPS: $VPS_HOST:$VPS_PORT as $VPS_USER"
-          echo "📂 Target Path: $DEPLOY_PATH"
+            echo "🔨 Building Admin"
+            pnpm build
 
-          if [ "$DEBUG" = "true" ]; then
-            echo "🧩 DEBUG MODE ENABLED — will print commands as they execute"
-            set -x
-          fi
+            echo "⚙️ Restarting PM2"
+            pm2 reload ecosystem.config.js --update-env || pm2 start ecosystem.config.js
 
-          ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST -p $VPS_PORT "
-            set -e
-
-            echo '🖥️ Connected to:' \$(hostname)
-            echo '📦 Starting deployment in:' $DEPLOY_PATH
-
-            # ================================
-            # CHECK OR CREATE DEPLOYMENT DIRECTORY
-            # ================================
-            if [ ! -d '$DEPLOY_PATH' ]; then
-              echo '📁 Directory not found — creating: $DEPLOY_PATH'
-              mkdir -p '$DEPLOY_PATH'
-              echo '🆕 New deployment directory created.'
-            fi
-            cd '$DEPLOY_PATH'
-
-            # ================================
-            # GIT OPERATIONS
-            # ================================
-            echo '🔄 Updating repository...'
-            if [ ! -d '.git' ]; then
-              echo '⚠️ .git folder missing — cloning repository fresh...'
-
-              if [ -z '${GIT_AUTH_TOKEN}' ]; then
-                echo '❌ ERROR: GIT_AUTH_TOKEN not set or invalid. Check GitHub Secrets.'
-                exit 1
-              fi
-
-              git clone https://x-access-token:${GIT_AUTH_TOKEN}@github.com/${REPO_SLUG}.git .
-            else
-              git fetch origin master
-              git reset --hard origin/master
-            fi
-
-            # ================================
-            # DEPENDENCIES INSTALL
-            # ================================
-            echo '📥 Installing dependencies with PNPM...'
-            pnpm install --frozen-lockfile
-
-            # ================================
-            # BUILD (Dynamic Memory)
-            # ================================
-            echo '⚙️ Preparing to build... calculating memory limits.'
-            TOTAL_MEM=\$(free -m | awk '/^Mem:/{print \$2}')
-            BUILD_MEM=\$((TOTAL_MEM * 75 / 100))
-            export NODE_OPTIONS=\"--max-old-space-size=\$BUILD_MEM\"
-
-            echo \"🧠 Total Memory: \${TOTAL_MEM}MB | Allocating: \${BUILD_MEM}MB for Node build\"
-            echo '🏗️ Building project...'
-            pnpm run build
-
-            # ================================
-            # PM2 DEPLOYMENT
-            # ================================
-            echo '🔁 Restarting PM2 service...'
-            pm2 startOrRestart ecosystem.config.js --env production
-
-            # ================================
-            # SUCCESS MESSAGE
-            # ================================
-            echo '✅ Deployment completed successfully!'
-            echo '📅 Finished at:' \$(date)
-          "
-
-          if [ "$DEBUG" = "true" ]; then
-            set +x
-            echo "🧩 DEBUG MODE DISABLED — end of logs"
-          fi
+            echo "✅ Admin deployment complete"
