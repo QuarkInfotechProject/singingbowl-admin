@@ -24,18 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { FaEye, FaTrash } from "react-icons/fa";
-import { Order } from "@/app/_types/orderType/orderType";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
@@ -43,7 +31,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import RootRootArtifactOrder from "./RootArtifactOrder";
 import debounce from "lodash.debounce";
 import {
   useEndUser,
@@ -69,7 +56,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const TransactionPage = () => {
   const { state, dispatch } = useProcess();
-  const paymentMethods = ["Order Placed", "Ncell Order"];
+  const paymentMethods = ["Order Placed"];
   const shippingCompany = [
     {
       label: "Don't Send for Shipping",
@@ -322,6 +309,7 @@ const TransactionPage = () => {
                 ))}
               </select>
             </div>
+            {/* 
             <div className="space-y-1  ">
               <label
                 htmlFor="limit"
@@ -360,7 +348,7 @@ const TransactionPage = () => {
                 <li>Generates Order Files</li>
               </ol>
             </div>
-
+            */}
             <Button
               className="bg-blue-500 hover:bg-blue-600 w-60"
               onClick={onSubmit}
@@ -467,8 +455,8 @@ const TransactionPage = () => {
                                     <span
                                       className={cn(
                                         product.name.toLowerCase() ===
-                                          searchProduct?.toLowerCase() &&
-                                          " cursor- font-bold text-primary"
+                                        searchProduct?.toLowerCase() &&
+                                        " cursor- font-bold text-primary"
                                       )}
                                       onClick={() =>
                                         handleProductClick(product.name)

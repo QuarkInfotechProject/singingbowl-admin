@@ -15,12 +15,12 @@ const menuItems = [
     icon: CiDiscount1,
     component: ActiveOffers,
   },
-  {
-    name: "Daraz Count",
-    url: "/admin/daraz-count",
-    icon: BiLogoDailymotion,
-    component: DarazCount,
-  },
+  // {
+  //   name: "Daraz Count",
+  //   url: "/admin/daraz-count",
+  //   icon: BiLogoDailymotion,
+  //   component: DarazCount,
+  // },
   {
     name: "Features",
     url: "/features",
