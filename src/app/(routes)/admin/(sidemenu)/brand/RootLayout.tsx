@@ -46,33 +46,43 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
+// Type definitions
+interface RootLogo {
+  id: number;
+  url: string;
+}
+
+interface RootBanner {
+  id: number;
+  url: string;
+}
+
+interface Brand {
+  id: number;
+  name: string;
+  slug: string;
+  status: number;
+  logo: RootLogo | null;
+  banner: RootBanner | null;
+}
+
+interface BrandResponse {
+  data: Brand[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
 const RootLayout = () => {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
-  const [selectedId, setSelectedId] = useState<string | undefined>();
+  const [selectedId, setSelectedId] = useState<number | undefined>();
   const [isLoadding, setIsLoadding] = useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
-  const [selectedDeleteId, setSelectedDeletedId] = useState<string>("");
+  const [selectedDeleteId, setSelectedDeletedId] = useState<number | null>(null);
   const [refetch, setRefetch] = useState<boolean>(false);
-  const [Brand, setBrand] = useState<any[]>([]);
+  const [brandData, setBrandData] = useState<BrandResponse | null>(null);
   const router = useRouter();
-  interface Root {
-    id: number;
-    name: string;
-    slug: string;
-    status: number;
-    logo: RootLogo;
-    banner: RootBanner;
-  }
-
-  interface RootLogo {
-    id: number;
-    url: string;
-  }
-
-  interface RootBanner {
-    id: number;
-    url: string;
-  }
   const fetchBrands = async (page: number = 1) => {
     try {
       setIsLoadding(true);
@@ -88,7 +98,7 @@ const RootLayout = () => {
           description: response.data.message,
           className: "bg-green-500 font-semibold text-white",
         });
-        setBrand(response.data.data);
+        setBrandData(response.data.data);
         setRefetch(false);
       }
     } catch (error) {
@@ -101,21 +111,21 @@ const RootLayout = () => {
     fetchBrands();
   }, [refetch]);
 
-  const HandleView = (id: any) => {
+  const HandleView = (id: number) => {
     setSelectedId(id);
     setIsSheetOpen(true);
   };
-  const handleEdit = (id: string) => {
+  const handleEdit = (id: number) => {
     router.push(`/admin/brand/edit/${id}`);
   };
 
-  const handleDelete = (id: any) => {
+  const handleDelete = (id: number) => {
     if (!id) return;
     setSelectedDeletedId(id);
     setIsDeleteOpen(true);
   };
   // Delete Logic
-  const onDelete = async (id: string) => {
+  const onDelete = async (id: number) => {
     const bodyData = {
       id: id,
     };
@@ -139,7 +149,7 @@ const RootLayout = () => {
     }
   };
   // Status change Logic
-  const handleChangeStatus = async (id: string) => {
+  const handleChangeStatus = async (id: number) => {
     if (!id) return;
     const bodyData = {
       id: id,
@@ -203,27 +213,37 @@ const RootLayout = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Brand?.data?.map((brand: Root, index: number) => (
+                {brandData?.data?.map((brand: Brand, index: number) => (
                   <TableRow key={brand.id}>
                     <TableCell>
-                      <Image
-                        alt={brand?.name}
-                        width={80}
-                        height={80}
-                        className="w-20 h-20 object-cover rounded-full p-1"
-                        src={brand.logo.url}
-                      />
+                      {brand?.logo?.url ? (
+                        <Image
+                          alt={brand?.name}
+                          width={80}
+                          height={80}
+                          className="w-20 h-20 object-cover rounded-full p-1"
+                          src={brand.logo.url}
+                        />
+                      ) : (
+                        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 text-xs">
+                          No Logo
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <Image
-                        alt={brand?.name}
-                        layout="intrinsic"
-                        height={100}
-                        width={100}
-                        className="h-20 w-20  object-cover rounded-full p-1 flex justify-center items-center "
-                        objectFit="cover"
-                        src={brand?.banner?.url||""}
-                      />
+                      {brand?.banner?.url ? (
+                        <Image
+                          alt={brand?.name}
+                          width={100}
+                          height={100}
+                          className="h-20 w-20 object-cover rounded-full p-1"
+                          src={brand.banner.url}
+                        />
+                      ) : (
+                        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 text-xs">
+                          No Banner
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {brand.name}
@@ -235,14 +255,14 @@ const RootLayout = () => {
                     <TableCell>
                       <Switch
                         checked={Boolean(brand.status)}
-                        onCheckedChange={() => handleChangeStatus(brand.id)}
+                        onCheckedChange={() => handleChangeStatus(brand.id as number)}
                       />
                     </TableCell>
 
                     <TableCell className="text-center">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="xs">
+                          <Button variant="outline" size="sm">
                             <BsThreeDots className="border-none outline-none text-xl" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -279,7 +299,7 @@ const RootLayout = () => {
 
             {isSheetOpen && (
               <DialogContent className="min-w-96 p-3    h-auto">
-                <ShowBrand id={selectedId} />
+                <ShowBrand id={String(selectedId)} />
               </DialogContent>
             )}
           </Dialog>
@@ -317,10 +337,10 @@ const RootLayout = () => {
       </AlertDialog>
       <Paginations
         fetchBrands={fetchBrands}
-        current_page={Brand?.current_page}
-        total={Brand.total}
-        per_page={Brand.per_page}
-        last_page={Brand.last_page}
+        current_page={brandData?.current_page ?? 1}
+        total={brandData?.total ?? 0}
+        per_page={brandData?.per_page ?? 10}
+        last_page={brandData?.last_page ?? 1}
       />
     </>
   );
@@ -417,9 +437,8 @@ const Paginations = ({
       >
         {/* Previous Button */}
         <div
-          className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-            current_page === 1 ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${current_page === 1 ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           onClick={() => handlePageChange(current_page - 1)}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -433,9 +452,8 @@ const Paginations = ({
 
         {/* Next Button */}
         <div
-          className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-            current_page === last_page ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${current_page === last_page ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           onClick={() => handlePageChange(current_page + 1)}
         >
           <span className="">Next</span>

@@ -53,7 +53,7 @@ const RootLayout = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
   const [selectedDeleteId, setSelectedDeletedId] = useState<string>("");
   const [refetch, setRefetch] = useState<boolean>(false);
-  const [flash, setflash] = useState<any[]>([]);
+  const [flash, setflash] = useState<any>({});
   const router = useRouter();
   const fetchflashs = async (page: number = 1) => {
     try {
@@ -194,11 +194,11 @@ const RootLayout = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {flash?.data?.map((flash, index) => (
-                  <TableRow key={flash.id}>
+                {flash?.data?.map((item: any, index: number) => (
+                  <TableRow key={item.id}>
                     {/* <TableCell>
                       <Image
-                        alt={flash.name}
+                        alt={item.name}
                         height={100}
                         width={100}
                         src={""}
@@ -206,50 +206,50 @@ const RootLayout = () => {
                     </TableCell>
                     <TableCell>
                       <Image
-                        alt={flash.name}
+                        alt={item.name}
                         height={100}
                         width={100}
                         src={""}
                       />
                     </TableCell> */}
                     <TableCell className="whitespace-nowrap">
-                      {flash.campaign_name}
+                      {item.campaign_name}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <Badge
-                        style={{ background: `${flash.theme_color.hex_code}` }}
+                        style={{ background: `${item.theme_color?.hex_code || '#ccc'}` }}
                       >
                         {" "}
-                        {flash.theme_color.hex_code}
+                        {item.theme_color?.hex_code || 'N/A'}
                       </Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <Badge
-                        style={{ background: `${flash.text_color.hex_code}` }}
+                        style={{ background: `${item.text_color?.hex_code || '#ccc'}` }}
                       >
                         {" "}
-                        {flash.text_color.hex_code}
+                        {item.text_color?.hex_code || 'N/A'}
                       </Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {flash.start_date}
+                      {item.start_date}
                     </TableCell>
                     <TableCell>
-                      <p className="line-clamp-3"> {flash.end_date}</p>
+                      <p className="line-clamp-3"> {item.end_date}</p>
                     </TableCell>
                     {/* <TableCell>
                       <Switch
-                        checked={Boolean(flash.status)}
-                        onCheckedChange={() => handleChangeStatus(flash.id)}
+                        checked={Boolean(item.status)}
+                        onCheckedChange={() => handleChangeStatus(item.id)}
                       />
                     </TableCell> */}
                     {/* <TableCell>
-                      <p className="line-clamp-3">{flash.description}</p>{" "}
+                      <p className="line-clamp-3">{item.description}</p>{" "}
                     </TableCell> */}
                     <TableCell className="text-center">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="xs">
+                          <Button variant="outline" size="sm">
                             <BsThreeDots className="border-none outline-none text-xl" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -258,17 +258,17 @@ const RootLayout = () => {
                           <DropdownMenuSeparator />
                           <DropdownMenuGroup>
                             <DropdownMenuItem
-                              onClick={() => handleEdit(flash.id)}
+                              onClick={() => handleEdit(item.id)}
                             >
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => HandleView(flash.id)}
+                              onClick={() => HandleView(item.id)}
                             >
                               View
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDelete(flash.id)}
+                              onClick={() => handleDelete(item.id)}
                             >
                               Delete
                             </DropdownMenuItem>
@@ -286,7 +286,7 @@ const RootLayout = () => {
 
             {isSheetOpen && (
               <DialogContent className="min-w-lg p-3    h-auto">
-                <Showflash id={selectedId} />
+                <Showflash id={String(selectedId)} />
               </DialogContent>
             )}
           </Dialog>
@@ -324,10 +324,10 @@ const RootLayout = () => {
       </AlertDialog>
       <Paginations
         fetchflashs={fetchflashs}
-        current_page={flash?.current_page}
-        total={flash.total}
-        per_page={flash.per_page}
-        last_page={flash.last_page}
+        current_page={flash?.current_page ?? 1}
+        total={flash?.total ?? 0}
+        per_page={flash?.per_page ?? 10}
+        last_page={flash?.last_page ?? 1}
       />
     </>
   );
@@ -428,9 +428,8 @@ const Paginations = ({
       >
         {/* Previous Button */}
         <div
-          className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-            current_page === 1 ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${current_page === 1 ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           onClick={() => handlePageChange(current_page - 1)}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -444,9 +443,8 @@ const Paginations = ({
 
         {/* Next Button */}
         <div
-          className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-            current_page === last_page ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${current_page === last_page ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           onClick={() => handlePageChange(current_page + 1)}
         >
           <span className="">Next</span>

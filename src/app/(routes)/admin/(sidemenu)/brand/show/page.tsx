@@ -20,7 +20,7 @@ interface Root {
   meta: RootMeta;
 }
 
- interface RootFiles {
+interface RootFiles {
   logo: RootFilesLogo;
   banner: RootFilesBanner;
 }
@@ -30,12 +30,12 @@ interface RootFilesLogo {
   logoUrl: string;
 }
 
- interface RootFilesBanner {
+interface RootFilesBanner {
   id: number;
   bannerUrl: string;
 }
 
- interface RootMeta {
+interface RootMeta {
   metaTitle: string;
   metaDescription: string;
 }
@@ -138,7 +138,7 @@ const ShowBrand: React.FC<BrandInfoProps> = ({ id }) => {
                 <h3 className="text-base  font-bold text-black">Status:</h3>
                 <p className="flex justify-start items-center  gap-x-4">
                   <Checkbox className="p-0 m-0" checked={Boolean(brandData?.status)} />
-                  <span className="text-base text-gray-400 font-medium">{brandData?.status===1?"active":"inactive"}</span>
+                  <span className="text-base text-gray-400 font-medium">{brandData?.status === 1 ? "active" : "inactive"}</span>
                 </p>
               </div>
 
@@ -160,12 +160,18 @@ const ShowBrand: React.FC<BrandInfoProps> = ({ id }) => {
                     Logo Image:
                   </h3>
                   <div className="border h-24  w-24 overflow-hidden rounded-lg p-2 relative flex justify-center items-center">
-                    <Image
-                      src={brandData?.files?.logo.logoUrl}
-                      alt="Logo"
-                      objectFit="cover"
-                      fill
-                    />
+                    {brandData?.files?.logo?.logoUrl ? (
+                      <Image
+                        src={brandData.files.logo.logoUrl}
+                        alt="Logo"
+                        objectFit="cover"
+                        fill
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                        No Logo
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -174,13 +180,18 @@ const ShowBrand: React.FC<BrandInfoProps> = ({ id }) => {
                     Banner Image:
                   </h3>
                   <div className="border h-24 w-24 overflow-hidden rounded-lg p-2 relative flex justify-center items-center">
-                    <Image
-                      src={brandData?.files?.banner.bannerUrl}
-                      alt="Banner"
-                      objectFit="cover"
-                      fill
-                    
-                    />
+                    {brandData?.files?.banner?.bannerUrl ? (
+                      <Image
+                        src={brandData.files.banner.bannerUrl}
+                        alt="Banner"
+                        objectFit="cover"
+                        fill
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                        No Banner
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

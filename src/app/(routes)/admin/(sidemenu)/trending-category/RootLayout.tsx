@@ -270,11 +270,17 @@ const RootLayout = ({
                             <GripVertical className="h-4 w-4 text-gray-400" />
                           </TableCell>
                           <TableCell {...provided.dragHandleProps}>
-                            <img
-                              src={item.category.files.logo.url}
-                              alt={item.category.name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
+                            {item.category?.files?.logo?.url ? (
+                              <img
+                                src={item.category.files.logo.url}
+                                alt={item.category?.name || 'Category'}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                                N/A
+                              </div>
+                            )}
                           </TableCell>
                           <TableCell {...provided.dragHandleProps}>
                             {item.category.name}

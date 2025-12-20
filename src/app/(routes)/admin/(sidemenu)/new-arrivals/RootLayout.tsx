@@ -55,8 +55,8 @@ const RootLayout = ({ newArrival }: { newArrival: newArrivalRootData[] }) => {
               <TableRow key={item.id}>
                 <TableCell>
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.image || ''}
+                    alt={item.name || 'Product'}
                     className="h-[50px] w-[50px] object-cover"
                   />
                 </TableCell>

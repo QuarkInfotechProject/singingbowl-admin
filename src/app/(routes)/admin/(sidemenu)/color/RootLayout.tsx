@@ -185,7 +185,7 @@ const RootLayout = () => {
                       </Badge>
                     </TableCell>
 
-                   
+
                     <TableCell className="text-center">
                       {" "}
                       <Switch
@@ -235,7 +235,7 @@ const RootLayout = () => {
                 <EditColor
                   setRefetch={setRefetch}
                   setIsSheetOpen={setIsSheetOpen}
-                  id={selectedColor}
+                  id={String(selectedColor)}
                 />
               </DialogContent>
             )}

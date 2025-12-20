@@ -48,10 +48,7 @@ const NoVariantsPricing = ({
     }
   }, [specialPrice, form]);
 
-  // Ensure quantity is always 1
-  useEffect(() => {
-    form.setValue("quantity", 1);
-  }, [form]);
+  // Default quantity is set in parent form, no longer forcing it to 1
 
   return (
     <div className="space-y-6">
@@ -92,8 +89,8 @@ const NoVariantsPricing = ({
                           type="number"
                           min={0}
                           className={`pl-10 h-11 text-base ${form.formState.errors.originalPrice
-                              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                              : "border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                            : "border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                             }`}
                           placeholder="0.00"
                           {...field}
@@ -134,8 +131,8 @@ const NoVariantsPricing = ({
                           type="number"
                           min={0}
                           className={`pl-10 h-11 text-base ${form.formState.errors.specialPrice
-                              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                              : "border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                            : "border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                             }`}
                           placeholder="0.00"
                           {...field}
@@ -261,8 +258,8 @@ const NoVariantsPricing = ({
                   <FormControl>
                     <Input
                       className={`h-11 text-base ${form.formState.errors.sku
-                          ? "border-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:border-blue-500"
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-blue-500"
                         }`}
                       placeholder="e.g., SB-001"
                       {...field}
@@ -276,29 +273,37 @@ const NoVariantsPricing = ({
               )}
             />
 
-            {/* Quantity Field - Fixed at 1 */}
+            {/* Quantity Field */}
             <FormField
               control={form.control}
               name="quantity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <FormLabel className="text-sm font-medium text-gray-700">
                     Stock Quantity
-                    <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
-                      Fixed
-                    </span>
+                    <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      value={1}
-                      disabled
-                      readOnly
-                      className="h-11 text-base bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed"
+                      min={1}
+                      step={1}
+                      className={`h-11 text-base ${form.formState.errors.quantity
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-blue-500"
+                        }`}
+                      placeholder="e.g., 100"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? null : parseInt(value, 10));
+                      }}
                     />
                   </FormControl>
+                  <FormMessage className="mt-1.5 text-sm" />
                   <FormDescription className="mt-2 text-xs text-gray-500">
-                    Quantity is fixed at 1 for each product
+                    Number of items available in stock
                   </FormDescription>
                 </FormItem>
               )}
@@ -320,16 +325,17 @@ const NoVariantsPricing = ({
                     <Input
                       type="number"
                       min={0}
+                      step="any"
                       className={`h-11 text-base pr-16 ${form.formState.errors.weight
-                          ? "border-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:border-blue-500"
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-blue-500"
                         }`}
-                      placeholder="e.g., 20"
+                      placeholder="e.g., 3.5"
                       {...field}
                       value={field.value ?? ""}
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value === "" ? null : Number(value));
+                        field.onChange(value === "" ? null : parseFloat(value));
                       }}
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
