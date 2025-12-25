@@ -39,17 +39,18 @@ import {
 
 interface ProductT {
   id: string;
+  uuid: string;
   name: string;
   originalPrice: string;
   specialPrice: string;
   variantCount: number;
   files:
-    | string
-    | [
-        {
-          imageUrl: string;
-        }
-      ];
+  | string
+  | [
+    {
+      imageUrl: string;
+    }
+  ];
 }
 
 interface CategoryT {
@@ -229,8 +230,8 @@ const AllProducts = ({
             {toUpdate === "cross-sell-product"
               ? "Cross Sell"
               : toUpdate === "related-product"
-              ? "Related "
-              : "Up Sell"}{" "}
+                ? "Related "
+                : "Up Sell"}{" "}
             Product
           </DialogTitle>
 
@@ -283,55 +284,52 @@ const AllProducts = ({
           ) : (
             <div className="flex-1 overflow-y-auto">
               <div
-                className={`grid gap-2 p-4 ${
-                  Array.isArray(filteredProducts) && filteredProducts.length > 0
+                className={`grid gap-2 p-4 ${Array.isArray(filteredProducts) && filteredProducts.length > 0
                     ? "grid-cols-6 "
                     : ""
-                }`}
+                  }`}
               >
                 {Array.isArray(filteredProducts) &&
-                filteredProducts.length > 0 ? (
+                  filteredProducts.length > 0 ? (
                   filteredProducts.map((item: ProductT) => {
                     const imageUrl = getImageUrl(item.files);
                     const isDisabled =
-                      uploadedProducts?.includes(item.id.toString()) ||
+                      uploadedProducts?.includes(item.uuid) ||
                       uploadedProducts?.length + localProductIds.length >=
-                        total ||
-                      localProductIds.includes(item.id.toString());
+                      total ||
+                      localProductIds.includes(item.uuid);
 
                     return (
                       <div
                         className="flex flex-col group hover:shadow-lg transition-all duration-200 bg-white rounded-lg border border-gray-200 overflow-hidden"
-                        key={item.id}
+                        key={item.uuid}
                       >
                         <div className="relative aspect-square">
                           <Image
                             onClick={() =>
                               !isDisabled &&
-                              handleProducts(item.id.toString(), imageUrl)
+                              handleProducts(item.uuid, imageUrl)
                             }
                             src={imageUrl || "/images/placeholder.png"}
-                            className={`w-full h-full cursor-pointer object-contain p-3 transition-transform duration-200 group-hover:scale-105 ${
-                              isDisabled && "opacity-50 pointer-events-none"
-                            }`}
+                            className={`w-full h-full cursor-pointer object-contain p-3 transition-transform duration-200 group-hover:scale-105 ${isDisabled && "opacity-50 pointer-events-none"
+                              }`}
                             height={200}
                             width={200}
                             alt={item.name}
                           />
 
                           <div
-                            className={`${
-                              uploadedProducts?.includes(item.id.toString())
+                            className={`${uploadedProducts?.includes(item.uuid)
                                 ? "flex"
                                 : "hidden"
-                            } pointer-events-none rounded-lg bg-green-600/90 text-white items-center justify-center absolute inset-0 backdrop-blur-sm`}
+                              } pointer-events-none rounded-lg bg-green-600/90 text-white items-center justify-center absolute inset-0 backdrop-blur-sm`}
                           >
                             <span className="font-medium whitespace-nowrap">
                               ✓ Uploaded
                             </span>
                           </div>
 
-                          {localProductIds.includes(item.id.toString()) && (
+                          {localProductIds.includes(item.uuid) && (
                             <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
                               <span className="w-4 h-4 text-xs flex items-center justify-center font-bold">
                                 ✓
@@ -404,10 +402,9 @@ const AllProducts = ({
               <p className="mb-3 font-medium text-lg">
                 Selected Products:{" "}
                 <span
-                  className={`font-normal ${
-                    localProductIds.length + uploadedProducts.length ===
-                      total && "text-green-600"
-                  }`}
+                  className={`font-normal ${localProductIds.length + uploadedProducts.length ===
+                    total && "text-green-600"
+                    }`}
                 >
                   {localProductIds.length + uploadedProducts.length}/{total}
                 </span>

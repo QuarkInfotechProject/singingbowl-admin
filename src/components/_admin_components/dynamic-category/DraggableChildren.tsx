@@ -67,14 +67,14 @@ const DraggableChild = ({
       };
 
       const res = await clientSideFetch({
-        url: "/categories/reorder",
+        url: "/admin/categories/reorder",
         toast,
         method: "post",
         body: sortData,
       });
 
       if (res?.status === 200) {
-        toast({className:"bg-green-500 text-base text-white font-semibold", description: `${res.data.message}` });
+        toast({ className: "bg-green-500 text-base text-white font-semibold", description: `${res.data.message}` });
         setRefetch(!refetch);
       }
     } catch (error) {

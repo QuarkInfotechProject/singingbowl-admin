@@ -13,28 +13,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import * as z from 'zod';
 import { useToast } from '@/components/ui/use-toast';
-import { DeliveryCharge, Country } from '@/app/_types/delivery-Types/deliveryCharges';
+import { DeliveryCharge } from '@/app/_types/delivery-Types/deliveryCharges';
 import { Skeleton } from '@/components/ui/skeleton';
-import countries from '@/data/countries.json';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   description: z.string().optional(),
-  deliveryCharge: z.string().optional(),
-  country: z.string().optional(),
-  countryCode: z.string().optional(),
-  chargeAbove20kg: z.string().optional(),
-  chargeAbove45kg: z.string().optional(),
-  chargeAbove100kg: z.string().optional(),
+  standardRate: z.string().optional(),
 });
 
 const RootDeliveryUpdate = ({
@@ -58,29 +45,10 @@ const RootDeliveryUpdate = ({
 
   const { setValue } = form;
 
-  const handleCountryChange = (countryName: string) => {
-    const selectedCountry = (countries as Country[]).find(c => c.name === countryName);
-    if (selectedCountry) {
-      setValue('country', selectedCountry.name);
-      setValue('countryCode', selectedCountry.code);
-    }
-  };
-
   useEffect(() => {
     if (deliveryData) {
       setValue('description', deliveryData.description || '');
-      setValue('deliveryCharge', deliveryData.deliveryCharge || '');
-      setValue('country', deliveryData.country || '');
-      setValue('chargeAbove20kg', deliveryData.chargeAbove20kg || '');
-      setValue('chargeAbove45kg', deliveryData.chargeAbove45kg || '');
-      setValue('chargeAbove100kg', deliveryData.chargeAbove100kg || '');
-
-      if (deliveryData.country) {
-        const selectedCountry = (countries as Country[]).find(c => c.name === deliveryData.country);
-        if (selectedCountry) {
-          setValue('countryCode', selectedCountry.code);
-        }
-      }
+      setValue('standardRate', deliveryData.deliveryCharge || '');
       setLoading(false);
     }
   }, [deliveryData, setValue]);
@@ -90,14 +58,9 @@ const RootDeliveryUpdate = ({
     const newData = {
       id: dataId,
       description: data.description,
-      deliveryCharge: data.deliveryCharge,
+      deliveryCharge: data.standardRate,
       additionalChargePerItem: 0,
       weightBasedCharge: 0,
-      country: data.country,
-      countryCode: data.countryCode,
-      chargeAbove20kg: data.chargeAbove20kg,
-      chargeAbove45kg: data.chargeAbove45kg,
-      chargeAbove100kg: data.chargeAbove100kg,
     };
 
     try {
@@ -141,23 +104,15 @@ const RootDeliveryUpdate = ({
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-64 mt-2" />
         </div>
-        <div className="space-y-8">
-          <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-6">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
             <Skeleton className="h-10 w-full" />
           </div>
-          <Skeleton className="h-20 w-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-20 w-full" />
+          </div>
         </div>
       </div>
     );
@@ -168,156 +123,47 @@ const RootDeliveryUpdate = ({
       <div className="w-full px-2">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Update Delivery Charge</h1>
-          <p className="text-sm text-gray-500 mt-1">Modify delivery pricing configuration</p>
+          <p className="text-sm text-gray-500 mt-1">Modify standard delivery pricing for all countries</p>
         </div>
 
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 max-h-[550px] overflow-y-auto pr-4"
+          className="space-y-6 max-h-[550px] overflow-y-auto pr-4"
         >
-          {/* Country & Base Charge - Top Row */}
-          <div className="grid grid-cols-2 gap-8">
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Country / Region</FormLabel>
-                  <Select onValueChange={handleCountryChange} value={field.value || ''}>
-                    <FormControl>
-                      <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus-visible:ring-0">
-                        <SelectValue placeholder="Select a country" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="max-h-[200px]">
-                      {(countries as Country[]).map((country) => (
-                        <SelectItem key={country.code} value={country.name}>
-                          {country.name} ({country.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-gray-500 mt-1">Leave empty for global pricing</p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* Standard Rate Section */}
+          <div className="space-y-4">
+            <div className="pb-2 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-700">Standard Rate</h2>
+              <p className="text-xs text-gray-500 mt-1">This rate applies to all countries globally</p>
+            </div>
 
             <FormField
               control={form.control}
-              name="deliveryCharge"
+              name="standardRate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Base Delivery Fee</FormLabel>
+                  <FormLabel className="text-sm font-medium">Delivery Charge</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                       <Input
                         type='number'
                         min={0}
-                        step="0.01"
+                        step="0.1"
                         placeholder="0.00"
                         {...field}
                         className="pl-7 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus:border-gray-300"
                       />
                     </div>
                   </FormControl>
-                  <p className="text-xs text-gray-500 mt-1">For orders under 20kg</p>
+                  <p className="text-xs text-gray-500 mt-1">Enter amount in dollars (e.g., 5.8)</p>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          {/* Weight-Based Charges - Second Row */}
-          <div className="space-y-4">
-            <div className="pb-2 border-b border-gray-200">
-              <h2 className="text-sm font-semibold text-gray-700">Weight-Based Charges</h2>
-              <p className="text-xs text-gray-500 mt-1">Additional charges for heavier shipments</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-6">
-              <FormField
-                control={form.control}
-                name="chargeAbove20kg"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium flex items-center gap-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">20kg+</span>
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                        <Input
-                          type='number'
-                          min={0}
-                          step="0.01"
-                          placeholder="0.00"
-                          {...field}
-                          className="pl-7 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus:border-gray-300"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="chargeAbove45kg"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium flex items-center gap-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">45kg+</span>
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                        <Input
-                          type='number'
-                          min={0}
-                          step="0.01"
-                          placeholder="0.00"
-                          {...field}
-                          className="pl-7 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus:border-gray-300"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="chargeAbove100kg"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium flex items-center gap-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">100kg+</span>
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                        <Input
-                          type='number'
-                          min={0}
-                          step="0.01"
-                          placeholder="0.00"
-                          {...field}
-                          className="pl-7 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus:border-gray-300"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Description - Bottom */}
+          {/* Description */}
           <FormField
             control={form.control}
             name="description"

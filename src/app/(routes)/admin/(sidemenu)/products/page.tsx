@@ -74,7 +74,7 @@ const UsersAndGroups = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSkuQuery, setIsSkuQuery] = useState(false);
-  const [sortBy, setSortBy] = useState<"price" | "name" |"date" |"">("date");
+  const [sortBy, setSortBy] = useState<"price" | "name" | "date" | "">("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | "">("desc");
   const [productsActive, setProductsActive] = useState(true);
   const { toast } = useToast();
@@ -91,7 +91,7 @@ const UsersAndGroups = () => {
       sortBy: sortBy as "price" | "name" | undefined,
       sortDirection: sortDirection as "asc" | "desc" | undefined,
       status: productsActive,
-      page: 1 
+      page: 1
     });
     setQuickEdits(false);
   }, [quickEdits]);
@@ -106,7 +106,7 @@ const UsersAndGroups = () => {
     });
   };
 
-  const handleEdit = (id:any) => {
+  const handleEdit = (id: any) => {
     router.push(`/admin/products/edit/${id}`);
   };
   const handleStatusChange = async (uuid, currentStatus) => {
@@ -149,12 +149,12 @@ const UsersAndGroups = () => {
     }
   };
 
-  const handleDeleteClick = (id:any) => {
+  const handleDeleteClick = (id: any) => {
     setSelectedItemId(id);
     setDeleteDialogOpen(true);
   };
 
-  const getImageUrl = (item:any) => {
+  const getImageUrl = (item: any) => {
     try {
       if (!item) return "/images/empty.jpg"; // Replace with your default image path
 
@@ -183,10 +183,10 @@ const UsersAndGroups = () => {
 
     context?.getData({
       [isSkuQuery ? "querySku" : "queryName"]: searchTerm,
-      sortBy: sortBy as "price" | "name" |"date"| undefined,
+      sortBy: sortBy as "price" | "name" | "date" | undefined,
       sortDirection: sortDirection as "asc" | "desc" | undefined,
       status: productsActive,
-      page: 1 
+      page: 1
     });
   };
 
@@ -528,11 +528,10 @@ const UsersAndGroups = () => {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`hover:bg-gray-100 transition-colors ${
-                                snapshot.isDragging
+                              className={`hover:bg-gray-100 transition-colors ${snapshot.isDragging
                                   ? "bg-slate-200 relative z-50"
                                   : ""
-                              }`}
+                                }`}
                             >
                               {snapshot.isDragging ? (
                                 <div className="flex justify-start items-center mt-1">
@@ -554,13 +553,12 @@ const UsersAndGroups = () => {
                                     </TableCell>
                                     <span
                                       onClick={() =>
-                                        handelShowQuickEdit(item.id)
+                                        handelShowQuickEdit(item.uuid)
                                       }
-                                      className={`text-blue-600 px-2 font-semibold cursor-pointer transition-all ease-in-out delay-500 ml-2 underline ${
-                                        item.hasVariant
+                                      className={`text-blue-600 px-2 font-semibold cursor-pointer transition-all ease-in-out delay-500 ml-2 underline ${item.hasVariant
                                           ? "hidden"
                                           : "hidden group-hover:block"
-                                      }`}
+                                        }`}
                                     >
                                       Quick edit
                                     </span>
@@ -601,7 +599,7 @@ const UsersAndGroups = () => {
                                         checked={item.status}
                                         onCheckedChange={() =>
                                           handleStatusChange(
-                                            item.id,
+                                            item.uuid,
                                             item.status
                                           )
                                         }
@@ -672,11 +670,10 @@ const UsersAndGroups = () => {
             aria-label="Pagination"
           >
             <div
-              className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-                context.state.currentPage === 1
+              className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${context.state.currentPage === 1
                   ? "opacity-50 cursor-not-allowed"
                   : ""
-              }`}
+                }`}
               onClick={() => {
                 if (context.state.currentPage === 1) return;
                 const newPage = context.state.currentPage - 1;
@@ -694,11 +691,10 @@ const UsersAndGroups = () => {
             </span>
 
             <div
-              className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-                context?.state?.currentPage === context?.state?.totalPages
+              className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${context?.state?.currentPage === context?.state?.totalPages
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
-              }`}
+                }`}
               onClick={() => {
                 if (context?.state?.currentPage !== context?.state?.totalPages) {
                   handlePaginationChange(context?.state?.currentPage + 1);

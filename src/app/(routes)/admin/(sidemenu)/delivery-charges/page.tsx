@@ -133,7 +133,7 @@ const DeliveryChargesPage = () => {
       <div className="flex flex-row justify-between">
         <div></div>
         <Dialog>
-          <DialogTrigger asChild>
+          {/* <DialogTrigger asChild>
             <a
               className={buttonVariants()}
               style={{ textDecoration: "none", backgroundColor: "white" }}
@@ -144,7 +144,7 @@ const DeliveryChargesPage = () => {
                 <span>Add New Delivery</span>
               </button>
             </a>
-          </DialogTrigger>
+          </DialogTrigger> */}
 
           {isSheetOpen && (
             <DialogContent className="max-w-[850px] h-auto max-h-[90vh]">
@@ -167,11 +167,7 @@ const DeliveryChargesPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Description</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead className="text-center">Delivery Charge</TableHead>
-                <TableHead className="text-center">Above 20kg</TableHead>
-                <TableHead className="text-center">Above 45kg</TableHead>
-                <TableHead className="text-center">Above 100kg</TableHead>
+                <TableHead className="text-center">Standard Rate</TableHead>
                 <th className="font-medium text-muted-foreground h-12 text-center">
                   Action
                 </th>
@@ -183,12 +179,8 @@ const DeliveryChargesPage = () => {
                   .fill(null)
                   .map((_, index) => (
                     <TableRow key={index}>
-                      <TableCell><Skeleton className="w-32 h-6" /></TableCell>
-                      <TableCell><Skeleton className="w-24 h-6" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="w-20 h-6" /></TableCell>
+                      <TableCell><Skeleton className="w-48 h-6" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="w-24 h-6 mx-auto" /></TableCell>
                       <TableCell className="flex gap-3 text-center justify-center">
                         <Skeleton className="w-8 h-8 rounded-md" />
                       </TableCell>
@@ -197,11 +189,11 @@ const DeliveryChargesPage = () => {
                 : deliveryData?.map((item: DeliveryCharge) => (
                   <TableRow key={item.id}>
                     <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.country || '-'}</TableCell>
-                    <TableCell className="text-center">${item.deliveryCharge}</TableCell>
-                    <TableCell className="text-center">${item.chargeAbove20kg}</TableCell>
-                    <TableCell className="text-center">${item.chargeAbove45kg}</TableCell>
-                    <TableCell className="text-center">${item.chargeAbove100kg}</TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        ${item.deliveryCharge}
+                      </span>
+                    </TableCell>
                     <TableCell className="flex gap-3 justify-center">
                       <DropdownMenu>
                         <DropdownMenuTrigger>

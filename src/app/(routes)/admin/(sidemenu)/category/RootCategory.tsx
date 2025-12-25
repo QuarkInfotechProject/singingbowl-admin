@@ -77,7 +77,7 @@ const RootCategory = ({
           body: sortData,
         });
         if (res?.status === 200) {
-          toast({ className:"bg-green-500 text-base font-semibold ", description: `${res.data.message}` });
+          toast({ className: "bg-green-500 text-base font-semibold ", description: `${res.data.message}` });
           setRefetch(!refetch);
         }
       } catch (error) {
