@@ -245,7 +245,7 @@ const AllImages = ({
   useEffect(() => {
     debouncedSetFilters(inputValue);
 
-    return () => {};
+    return () => { };
   }, [inputValue, debouncedSetFilters]);
 
   const updateImage = useCallback((updatedImage) => {
@@ -332,7 +332,7 @@ const AllImages = ({
                       </div>
                     </DialogHeader>
                     <div className="grid gap-2 grid-cols-[15%_1fr]">
-                      <div className="overflow-y-scroll py-4">
+                      <div className="overflow-y-auto py-4 max-h-[380px]">
                         <div className="flex items-center justify-between">
                           <p className="mb-3 font-medium">Categories:</p>
                           {/* <p>add +</p> */}
@@ -398,7 +398,7 @@ const AllImages = ({
                                 key={item.id}
                                 variant={
                                   activeCategory.toLowerCase() ===
-                                  item.name.toLowerCase()
+                                    item.name.toLowerCase()
                                     ? "secondary"
                                     : "outline"
                                 }
@@ -438,11 +438,10 @@ const AllImages = ({
                         ) : (
                           <div className="min-h-[50vh] max-h-[75vh] overflow-scroll pb-40">
                             <div
-                              className={`grid gap-y-5   ${
-                                images &&
+                              className={`grid gap-y-5   ${images &&
                                 images.length > 0 &&
                                 "grid-cols-6 justify-start"
-                              } gap-4 `}
+                                } gap-4 `}
                             >
                               {images && images.length !== 0 ? (
                                 images.map((item) => {
@@ -481,11 +480,10 @@ const AllImages = ({
                                 aria-label="Pagination"
                               >
                                 <div
-                                  className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-                                    currentPage === 1
+                                  className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${currentPage === 1
                                       ? "opacity-50 cursor-not-allowed"
                                       : ""
-                                  }`}
+                                    }`}
                                   onClick={handlePreviousClick}
                                   disabled={currentPage === 1}
                                 >
@@ -501,11 +499,10 @@ const AllImages = ({
                                 </span>
 
                                 <div
-                                  className={`relative inline-flex items-center rounded-r-md px-2 py-2 hover:text-black text-gray-700  focus:z-20 focus:outline-offset-0 ${
-                                    currentPage === totalPages
+                                  className={`relative inline-flex items-center rounded-r-md px-2 py-2 hover:text-black text-gray-700  focus:z-20 focus:outline-offset-0 ${currentPage === totalPages
                                       ? "opacity-50 cursor-not-allowed"
                                       : ""
-                                  }`}
+                                    }`}
                                   onClick={handleNextClick}
                                   disabled={currentPage === totalPages}
                                 >
@@ -535,11 +532,10 @@ const AllImages = ({
                             Total Images :{" "}
                             {toUpdate === "additional" ? (
                               <span
-                                className={`font-normal ${
-                                  localAdditionalIds.length +
-                                    uploadedImages.length ===
-                                    total && "text-green-600"
-                                }`}
+                                className={`font-normal ${localAdditionalIds.length +
+                                  uploadedImages.length ===
+                                  total && "text-green-600"
+                                  }`}
                               >
                                 {localAdditionalIds.length +
                                   uploadedImages.length}
@@ -751,7 +747,7 @@ const SingleImage = ({
             <Link target="_blank" href={`${item.imageUrl}`}>
               <button
                 className="text-white text-[13px] flex mt-16 items-center gap-3  px-3 py-1 rounded   hover:bg-gray-950 "
-                // onClick={() => handleCopyUrl(item.imageUrl)}
+              // onClick={() => handleCopyUrl(item.imageUrl)}
               >
                 <FaCopy />
                 Open Url
@@ -778,7 +774,7 @@ const SingleImage = ({
                 autoPlay
                 loop
                 playsInline
-                // defaultMuted
+              // defaultMuted
               >
                 <source src={item.imageUrl} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -788,16 +784,14 @@ const SingleImage = ({
             /* Image */
             <Image
               src={item.imageUrl}
-              className={`items-center h-[100px] w-[100px] mx-auto justify-center border rounded-sm bg-gray-300 ${
-                uploadedImages?.includes(item.id.toString()) &&
+              className={`items-center h-[100px] w-[100px] mx-auto justify-center border rounded-sm bg-gray-300 ${uploadedImages?.includes(item.id.toString()) &&
                 "pointer-events-none"
-              } ${
-                (uploadedImages?.length + localAdditionalIds.length >= total ||
+                } ${(uploadedImages?.length + localAdditionalIds.length >= total ||
                   localAdditionalIds.includes(item.id.toString()) ||
                   localDescriptionIds.includes(item.id.toString()) ||
                   localBaseId === item.id.toString()) &&
                 "opacity-45 pointer-events-none"
-              }`}
+                }`}
               height={200}
               width={200}
               alt={item.fileName}

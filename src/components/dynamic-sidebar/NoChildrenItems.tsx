@@ -34,9 +34,8 @@ export const NoChildrenItems = ({
     (pathname === "/admin" && url === "/") || `/admin${url}` === pathname;
   return (
     <div
-      className={`${
-        isVisible ? "" : "hidden"
-      }  transition-all duration-300 ease-in-out `}
+      className={`${isVisible ? "" : "hidden"
+        }  transition-all duration-300 ease-in-out `}
       onClick={() => {
         if (url) {
           router.push(`/admin${url}`);
@@ -45,11 +44,10 @@ export const NoChildrenItems = ({
     >
       <div
         className={`dark:bg-zinc-900  
-           ${isActiveMenu ? "bg-gray-500" : ""}
-          flex mb-2 items-center dark:bg-transparent p-2 rounded gap-2 cursor-pointer   ${
-            isHovered
-              ? "hover:bg-gray-600  translate-x-[1px] translate-y-1 rotate-30 transition duration-200 relative after:absolute after:top-1.5 after:translate-x-[2px] after:-translate-y-2 after:-rotate-30 rounded-md text-black dark:hover:bg-gray-950"
-              : ""
+           ${isActiveMenu ? "bg-gradient-to-r from-red-600 to-red-400 text-white" : ""}
+          flex mb-2 items-center dark:bg-transparent p-2 rounded gap-2 cursor-pointer   ${isHovered && !isActiveMenu
+            ? "hover:bg-gray-600  translate-x-[1px] translate-y-1 rotate-30 transition duration-200 relative after:absolute after:top-1.5 after:translate-x-[2px] after:-translate-y-2 after:-rotate-30 rounded-md text-black dark:hover:bg-gray-950"
+            : ""
           }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

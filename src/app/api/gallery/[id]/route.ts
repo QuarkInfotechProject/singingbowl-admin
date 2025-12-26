@@ -2,16 +2,20 @@ import { cookies } from "next/headers";
 import { NextResponse, NextRequest } from "next/server";
 
 /**
- * POST: Fetch all galleries (List endpoint)
- * The backend expects POST request for listing galleries
+ * GET: Fetch gallery details by ID
+ * URL: /api/gallery/[id]
  */
-export async function POST(request: NextRequest) {
+export async function GET(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
     const cookieStore = cookies();
     const token = cookieStore.get("token")?.value;
+    const { id } = params;
 
     try {
-        const res = await fetch(`${process.env.BASE_URL}/galleries`, {
-            method: "POST",
+        const res = await fetch(`${process.env.BASE_URL}/galleries/show/${id}`, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
@@ -26,7 +30,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(data);
         }
     } catch (error) {
-        console.log("galleries get error", error);
+        console.log("gallery show error", error);
         throw new Error(`${error}`);
     }
 }

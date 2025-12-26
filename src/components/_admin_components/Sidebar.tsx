@@ -31,6 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ menuData }) => {
   const isMountedRef = useRef(false);
   const [refetch, setRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
 
   const handleMenuUpdate = useCallback(
     (newData: MenuT[]) => {
@@ -55,18 +56,16 @@ const Sidebar: React.FC<SidebarProps> = ({ menuData }) => {
   return (
     <>
       <Button
-        className={`md:hidden ${
-          sidebarOpen && "hidden"
-        } absolute left-4 z-10 top-2`}
+        className={`md:hidden ${sidebarOpen && "hidden"
+          } absolute left-4 z-10 top-2`}
         onClick={() => setSidebarOpen(true)}
         variant="secondary"
       >
         <AiOutlineMenuUnfold className="text-lg" />
       </Button>
       <aside
-        className={`absolute left-0 top-0 z-50 bg-black flex h-screen w-72.5 md:min-w-[230px] flex-col overflow-y-hidden  duration-300 ease-linear transform- lg:static lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`absolute left-0 top-0 z-50 bg-black flex h-screen w-72.5 md:min-w-[230px] flex-col overflow-y-hidden  duration-300 ease-linear transform- lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center  justify-between gap-1 px-6  ">
           <Link
@@ -141,6 +140,28 @@ const Sidebar: React.FC<SidebarProps> = ({ menuData }) => {
                           }
                         />
                       </div>
+                    )}
+
+                    {/* Static Gallery Link - appears after Blogs */}
+                    {item.title?.toLowerCase() === "blogs" && (
+                      <Link href="/admin/gallery">
+                        <div
+                          className={`flex mb-2 items-center p-2 rounded gap-2 cursor-pointer transition duration-200 ${pathname === "/admin/gallery"
+                            ? "bg-gradient-to-r from-red-600 to-red-400 text-white"
+                            : "hover:bg-gray-600"
+                            }`}
+                        >
+                          <Image
+                            src="/icons/media.svg"
+                            alt="gallery"
+                            width={20}
+                            height={20}
+                          />
+                          <span className="text-sm text-gray-100 font-semibold">
+                            Gallery
+                          </span>
+                        </div>
+                      </Link>
                     )}
                   </div>
                 ))}
