@@ -149,7 +149,7 @@ const RootDeliveryUpdate = ({
                       <Input
                         type='number'
                         min={0}
-                        step="0.1"
+                        step="0.01"
                         placeholder="0.00"
                         {...field}
                         className="pl-7 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus:border-gray-300"
