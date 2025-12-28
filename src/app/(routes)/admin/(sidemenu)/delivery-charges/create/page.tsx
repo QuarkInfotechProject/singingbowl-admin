@@ -43,6 +43,8 @@ const AddDelivery = ({ setRefetch, setIsSheetOpen }: { setRefetch: any; setIsShe
       deliveryCharge: submitedValues.standardRate,
       additionalChargePerItem: 0,
       weightBasedCharge: 0,
+
+
     };
     try {
       const { data } = await axios.post('/api/delivery-charge/add', payload);

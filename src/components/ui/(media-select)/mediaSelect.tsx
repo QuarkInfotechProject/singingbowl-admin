@@ -111,7 +111,7 @@ const AllImages = ({
     sortDirection: "",
   });
 
-  const total = 8;
+  const total = 100; // Allow up to 100 images for gallery
   const handleIsImagesLoading = (bool: boolean) => {
     setIsImagesLoading(bool);
   };
@@ -214,7 +214,17 @@ const AllImages = ({
       setLocalBaseId("");
       setLocalDescriptionThumbnails("");
     } else if (toUpdate === "additional") {
+      // Call onSelect for each selected image
+      localAdditionalIds.forEach((id, index) => {
+        onSelect(localAdditionalThumbnails[index], parseInt(id));
+      });
+      // Clear the selections after inserting
+      setLocalAdditionalIds([]);
+      setLocalAdditionalThumbnails([]);
     } else if (toUpdate === "descriptions") {
+      onSelect(localDescriptionThumbnails, parseInt(localDescriptionIds));
+      setLocalDescriptionThumbnails("");
+      setLocalDescriptionIds("");
     }
   };
   const handleRemove = (url: string) => {
@@ -481,8 +491,8 @@ const AllImages = ({
                               >
                                 <div
                                   className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${currentPage === 1
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                     }`}
                                   onClick={handlePreviousClick}
                                   disabled={currentPage === 1}
@@ -500,8 +510,8 @@ const AllImages = ({
 
                                 <div
                                   className={`relative inline-flex items-center rounded-r-md px-2 py-2 hover:text-black text-gray-700  focus:z-20 focus:outline-offset-0 ${currentPage === totalPages
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                     }`}
                                   onClick={handleNextClick}
                                   disabled={currentPage === totalPages}

@@ -54,6 +54,15 @@ interface Gallery {
     updatedAt: string;
 }
 
+interface PaginationInfo {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+}
+
 interface GalleryFormData {
     id?: number;
     title: string;
@@ -76,6 +85,8 @@ const GalleryPage = () => {
     // List state
     const [galleries, setGalleries] = useState<Gallery[]>([]);
     const [isListLoading, setIsListLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState<PaginationInfo | null>(null);
 
     // Form state
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -94,21 +105,56 @@ const GalleryPage = () => {
     });
     const [selectedImages, setSelectedImages] = useState<LocalGalleryImage[]>([]);
 
-    // Fetch galleries on mount
+    // Fetch galleries on mount and when page changes
     useEffect(() => {
         fetchGalleries();
-    }, []);
+    }, [currentPage]);
 
     const fetchGalleries = async () => {
         setIsListLoading(true);
         try {
-            const response = await fetch("/api/gallery", {
+            const response = await fetch(`/api/gallery?page=${currentPage}`, {
                 method: "POST",
             });
             const result = await response.json();
 
             if (result.code === 0 && result.data) {
-                setGalleries(result.data);
+                // Transform the response: convert flat image array to gallery objects
+                const imageData = result.data.data || result.data;
+                const transformedData = imageData.map((image: any) => {
+                    // Extract filename without extension for title
+                    const filename = image.imageUrl.split('/').pop() || '';
+                    const titleFromFilename = filename.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+
+                    return {
+                        id: image.id,
+                        uuid: `uuid-${image.id}`,
+                        title: titleFromFilename || `Image ${image.id}`,
+                        slug: filename.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+                        description: "",
+                        status: true, // Default to active
+                        images: [
+                            {
+                                id: image.id,
+                                url: image.imageUrl,
+                                thumbnailUrl: image.thumbnailUrl,
+                                mime: image.mime,
+                                size: image.size,
+                                width: image.width,
+                                height: image.height,
+                            }
+                        ],
+                        createdAt: image.created_at,
+                        updatedAt: image.updated_at,
+                    } as Gallery;
+                });
+
+                setGalleries(transformedData);
+
+                // Store pagination info
+                if (result.data.pagination) {
+                    setPagination(result.data.pagination);
+                }
             } else {
                 throw new Error(result.message || "Failed to fetch galleries");
             }
@@ -265,11 +311,11 @@ const GalleryPage = () => {
         }
     };
 
-    // Submit form (create or update)
+    // Submit form - update gallery ID 3 with selected images
     const handleSubmit = async () => {
-        if (!formData.title.trim() || !formData.slug.trim()) {
+        if (formData.images.length === 0) {
             toast({
-                description: "Title and slug are required",
+                description: "Please select at least one image",
                 variant: "destructive",
             });
             return;
@@ -277,26 +323,39 @@ const GalleryPage = () => {
 
         setIsSubmitting(true);
         try {
-            const endpoint = editingGallery
-                ? "/api/gallery/update"
-                : "/api/gallery/create";
+            const endpoint = "/api/gallery/update";
 
-            const body = editingGallery
-                ? {
-                    id: editingGallery.id,
-                    title: formData.title,
-                    slug: formData.slug,
-                    description: formData.description,
-                    status: formData.status,
-                    images: formData.images,
+            // Fetch existing gallery data from API to get current image IDs
+            let existingImageIds: number[] = [];
+            try {
+                console.log("🔍 Fetching existing gallery data from /api/gallery/3...");
+                const response = await fetch(`/api/gallery/3`);
+                const result = await response.json();
+                console.log("📦 Gallery fetch response:", result);
+
+                if (result.code === 0 && result.data && Array.isArray(result.data)) {
+                    existingImageIds = result.data.map((img: any) => img.id);
+                    console.log("✅ Existing image IDs extracted:", existingImageIds);
+                } else {
+                    console.warn("⚠️ Unexpected response structure:", result);
                 }
-                : {
-                    title: formData.title,
-                    slug: formData.slug,
-                    description: formData.description,
-                    status: formData.status,
-                    images: formData.images,
-                };
+            } catch (error) {
+                console.error("❌ Error fetching existing gallery:", error);
+                // Continue with empty array if fetch fails
+            }
+
+            console.log("🆕 New image IDs from form:", formData.images);
+
+            // Combine existing images with new ones (remove duplicates)
+            const allImageIds = [...new Set([...existingImageIds, ...formData.images])];
+            console.log("🔗 Combined image IDs (existing + new):", allImageIds);
+
+            const body = {
+                id: 3, // Hardcoded gallery ID
+                images: allImageIds,
+            };
+
+            console.log("📤 Final payload being sent:", body);
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -308,29 +367,37 @@ const GalleryPage = () => {
 
             const result = await response.json();
 
-            if (response.ok) {
+            if (response.ok || result.code === 0) {
                 toast({
-                    description: editingGallery
-                        ? "Gallery updated successfully"
-                        : "Gallery created successfully",
+                    description: "Images added to gallery successfully",
                     className: "bg-green-500 text-white",
                 });
                 setIsDialogOpen(false);
+                setSelectedImages([]);
+                setFormData({
+                    title: "",
+                    slug: "",
+                    description: "",
+                    status: "1",
+                    images: [],
+                });
+                setCurrentPage(1); // Reset to first page
                 fetchGalleries();
             } else {
-                throw new Error(result.error || "Operation failed");
+                throw new Error(result.message || result.error || "Operation failed");
             }
         } catch (error) {
             console.error("Error saving gallery:", error);
             toast({
                 description:
-                    error instanceof Error ? error.message : "Failed to save gallery",
+                    error instanceof Error ? error.message : "Failed to add images",
                 variant: "destructive",
             });
         } finally {
             setIsSubmitting(false);
         }
     };
+
 
     return (
         <div className="w-full p-6">
@@ -344,12 +411,12 @@ const GalleryPage = () => {
                 </div>
                 <Button onClick={handleCreateNew} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    Create Gallery
+                    Add Images
                 </Button>
             </div>
 
-            {/* Gallery List */}
-            <div className="bg-white rounded-lg border">
+            {/* Gallery Grid */}
+            <div className="bg-white rounded-lg border p-6">
                 {isListLoading ? (
                     <div className="flex items-center justify-center h-64">
                         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
@@ -365,65 +432,96 @@ const GalleryPage = () => {
                         </p>
                     </div>
                 ) : (
-                    <div className="divide-y">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                         {galleries.map((gallery) => (
                             <div
                                 key={gallery.id}
-                                className="p-4 flex items-center justify-between hover:bg-gray-50"
+                                className="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:shadow-lg transition-shadow cursor-pointer"
                             >
-                                <div className="flex items-center gap-4">
-                                    {/* Thumbnail */}
-                                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                                        {gallery.images && gallery.images.length > 0 ? (
-                                            <img
-                                                src={gallery.images[0].thumbnailUrl || gallery.images[0].url}
-                                                alt={gallery.title}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <ImageIcon className="h-6 w-6 text-gray-300" />
-                                            </div>
-                                        )}
+                                {/* Image */}
+                                {gallery.images && gallery.images.length > 0 ? (
+                                    <img
+                                        src={gallery.images[0].thumbnailUrl || gallery.images[0].url}
+                                        alt={gallery.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <ImageIcon className="h-12 w-12 text-gray-300" />
                                     </div>
-                                    {/* Info */}
-                                    <div>
-                                        <h3 className="font-medium">{gallery.title}</h3>
-                                        <p className="text-sm text-gray-500">{gallery.slug}</p>
-                                        <div className="flex items-center gap-3 mt-1">
-                                            <span className="text-xs text-gray-400">
-                                                {gallery.images?.length || 0} images
-                                            </span>
-                                            <span
-                                                className={`text-xs px-2 py-0.5 rounded-full ${gallery.status
-                                                        ? "bg-green-100 text-green-700"
-                                                        : "bg-gray-100 text-gray-600"
-                                                    }`}
-                                            >
-                                                {gallery.status ? "Active" : "Inactive"}
-                                            </span>
-                                        </div>
+                                )}
+
+                                {/* Overlay with title on hover */}
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                                    <div className="text-white">
+                                        <h3 className="font-medium text-sm line-clamp-2">
+                                            {gallery.title}
+                                        </h3>
+                                        <p className="text-xs text-gray-300 mt-1">
+                                            {new Date(gallery.createdAt).toLocaleDateString()}
+                                        </p>
                                     </div>
-                                </div>
-                                {/* Actions */}
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleView(gallery)}
-                                    >
-                                        <Eye className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleEdit(gallery)}
-                                    >
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {pagination && pagination.last_page > 1 && (
+                    <div className="mt-6 flex items-center justify-between border-t pt-4">
+                        <div className="text-sm text-gray-600">
+                            Showing {pagination.from} to {pagination.to} of {pagination.total} images
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1 || isListLoading}
+                            >
+                                Previous
+                            </Button>
+                            <div className="flex items-center gap-1">
+                                {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map((page) => {
+                                    // Show first page, last page, current page, and pages around current
+                                    const showPage =
+                                        page === 1 ||
+                                        page === pagination.last_page ||
+                                        (page >= currentPage - 1 && page <= currentPage + 1);
+
+                                    const showEllipsisBefore = page === currentPage - 2 && currentPage > 3;
+                                    const showEllipsisAfter = page === currentPage + 2 && currentPage < pagination.last_page - 2;
+
+                                    if (showEllipsisBefore || showEllipsisAfter) {
+                                        return <span key={page} className="px-2 text-gray-400">...</span>;
+                                    }
+
+                                    if (!showPage) return null;
+
+                                    return (
+                                        <Button
+                                            key={page}
+                                            variant={currentPage === page ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setCurrentPage(page)}
+                                            disabled={isListLoading}
+                                            className="min-w-[2.5rem]"
+                                        >
+                                            {page}
+                                        </Button>
+                                    );
+                                })}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
+                                disabled={currentPage === pagination.last_page || isListLoading}
+                            >
+                                Next
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>
@@ -433,63 +531,14 @@ const GalleryPage = () => {
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
-                            {editingGallery ? "Edit Gallery" : "Create Gallery"}
+                            Add Images to Gallery
                         </DialogTitle>
+                        <p className="text-sm text-gray-500 mt-2">
+                            Select images to add to the gallery. Selected images will be added to existing images.
+                        </p>
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
-                        {/* Title */}
-                        <div className="space-y-2">
-                            <Label htmlFor="title">Title *</Label>
-                            <Input
-                                id="title"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleInputChange}
-                                placeholder="Enter gallery title"
-                            />
-                        </div>
-
-                        {/* Slug */}
-                        <div className="space-y-2">
-                            <Label htmlFor="slug">Slug *</Label>
-                            <Input
-                                id="slug"
-                                name="slug"
-                                value={formData.slug}
-                                onChange={handleInputChange}
-                                placeholder="gallery-slug"
-                            />
-                        </div>
-
-                        {/* Description */}
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                placeholder="Enter gallery description"
-                                rows={3}
-                            />
-                        </div>
-
-                        {/* Status */}
-                        <div className="flex items-center space-x-2">
-                            <Switch
-                                id="status"
-                                checked={formData.status === "1"}
-                                onCheckedChange={(checked) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        status: checked ? "1" : "0",
-                                    }))
-                                }
-                            />
-                            <Label htmlFor="status">Active</Label>
-                        </div>
-
                         {/* Images */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -498,7 +547,7 @@ const GalleryPage = () => {
                                     trigger={
                                         <Button variant="outline" size="sm" className="gap-2">
                                             <Plus className="h-4 w-4" />
-                                            Add Images
+                                            Select Images
                                         </Button>
                                     }
                                     onSelect={handleImageSelect}
@@ -513,66 +562,72 @@ const GalleryPage = () => {
                                 <div className="flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg text-gray-400">
                                     <ImageIcon className="h-8 w-8 mb-2" />
                                     <p className="text-sm">No images selected</p>
+                                    <p className="text-xs text-gray-400 mt-1">Click "Select Images" to add images</p>
                                 </div>
                             ) : (
-                                <DragDropContext onDragEnd={handleDragEnd}>
-                                    <Droppable droppableId="gallery-images" direction="horizontal">
-                                        {(provided) => (
-                                            <div
-                                                ref={provided.innerRef}
-                                                {...provided.droppableProps}
-                                                className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3"
-                                            >
-                                                {selectedImages.map((image, index) => (
-                                                    <Draggable
-                                                        key={image.id}
-                                                        draggableId={image.id.toString()}
-                                                        index={index}
-                                                    >
-                                                        {(provided, snapshot) => (
-                                                            <div
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                                className={`relative group rounded-lg overflow-hidden border-2 ${snapshot.isDragging
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} selected
+                                    </p>
+                                    <DragDropContext onDragEnd={handleDragEnd}>
+                                        <Droppable droppableId="gallery-images" direction="horizontal">
+                                            {(provided) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.droppableProps}
+                                                    className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3"
+                                                >
+                                                    {selectedImages.map((image, index) => (
+                                                        <Draggable
+                                                            key={image.id}
+                                                            draggableId={image.id.toString()}
+                                                            index={index}
+                                                        >
+                                                            {(provided, snapshot) => (
+                                                                <div
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.draggableProps}
+                                                                    className={`relative group rounded-lg overflow-hidden border-2 ${snapshot.isDragging
                                                                         ? "border-purple-500 shadow-lg"
                                                                         : "border-transparent hover:border-gray-200"
-                                                                    }`}
-                                                            >
-                                                                {/* Drag Handle */}
-                                                                <div
-                                                                    {...provided.dragHandleProps}
-                                                                    className="absolute top-1 left-1 z-10 bg-white/80 rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab"
+                                                                        }`}
                                                                 >
-                                                                    <GripVertical className="h-3 w-3 text-gray-600" />
-                                                                </div>
+                                                                    {/* Drag Handle */}
+                                                                    <div
+                                                                        {...provided.dragHandleProps}
+                                                                        className="absolute top-1 left-1 z-10 bg-white/80 rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab"
+                                                                    >
+                                                                        <GripVertical className="h-3 w-3 text-gray-600" />
+                                                                    </div>
 
-                                                                {/* Remove Button */}
-                                                                <button
-                                                                    onClick={() =>
-                                                                        handleRemoveImage(image.id)
-                                                                    }
-                                                                    className="absolute top-1 right-1 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                >
-                                                                    <X className="h-3 w-3" />
-                                                                </button>
+                                                                    {/* Remove Button */}
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            handleRemoveImage(image.id)
+                                                                        }
+                                                                        className="absolute top-1 right-1 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    >
+                                                                        <X className="h-3 w-3" />
+                                                                    </button>
 
-                                                                {/* Image */}
-                                                                <div className="aspect-square bg-gray-100">
-                                                                    <img
-                                                                        src={image.imageUrl}
-                                                                        alt={image.fileName}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
+                                                                    {/* Image */}
+                                                                    <div className="aspect-square bg-gray-100">
+                                                                        <img
+                                                                            src={image.imageUrl}
+                                                                            alt={image.fileName}
+                                                                            className="w-full h-full object-cover"
+                                                                        />
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                ))}
-                                                {provided.placeholder}
-                                            </div>
-                                        )}
-                                    </Droppable>
-                                </DragDropContext>
+                                                            )}
+                                                        </Draggable>
+                                                    ))}
+                                                    {provided.placeholder}
+                                                </div>
+                                            )}
+                                        </Droppable>
+                                    </DragDropContext>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -589,12 +644,10 @@ const GalleryPage = () => {
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Saving...
+                                    Adding...
                                 </>
-                            ) : editingGallery ? (
-                                "Update Gallery"
                             ) : (
-                                "Create Gallery"
+                                "Add Images"
                             )}
                         </Button>
                     </DialogFooter>
@@ -619,8 +672,8 @@ const GalleryPage = () => {
                                     <span className="font-medium">Status:</span>{" "}
                                     <span
                                         className={`px-2 py-0.5 rounded-full ${viewingGallery.status
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-gray-100 text-gray-600"
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-gray-100 text-gray-600"
                                             }`}
                                     >
                                         {viewingGallery.status ? "Active" : "Inactive"}
