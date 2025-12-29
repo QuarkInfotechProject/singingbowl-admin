@@ -328,7 +328,7 @@ const GalleryPage = () => {
             // Fetch existing gallery data from API to get current image IDs
             let existingImageIds: number[] = [];
             try {
-                console.log("🔍 Fetching existing gallery data from /api/gallery/3...");
+                console.log("🔍 Fetching existing gallery data from /api/gallery/4...");
                 const response = await fetch(`/api/gallery/4`);
                 const result = await response.json();
                 console.log("📦 Gallery fetch response:", result);
@@ -351,7 +351,7 @@ const GalleryPage = () => {
             console.log("🔗 Combined image IDs (existing + new):", allImageIds);
 
             const body = {
-                id: 3, // Hardcoded gallery ID
+                id: 4, // Hardcoded gallery ID
                 images: allImageIds,
             };
 
