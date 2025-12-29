@@ -329,7 +329,7 @@ const GalleryPage = () => {
             let existingImageIds: number[] = [];
             try {
                 console.log("🔍 Fetching existing gallery data from /api/gallery/3...");
-                const response = await fetch(`/api/gallery/3`);
+                const response = await fetch(`/api/gallery/4`);
                 const result = await response.json();
                 console.log("📦 Gallery fetch response:", result);
 
