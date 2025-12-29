@@ -273,9 +273,9 @@ const AllImages = ({
           <DialogTrigger className="w-full" asChild>
             {trigger}
           </DialogTrigger>
-          <DialogContent className="max-w-[1350px] mx-auto h-[600px]">
-            <div>
-              <Tabs selectedIndex={activeTabIndex} onSelect={handleTabChange}>
+          <DialogContent className="max-w-[1350px] w-full mx-auto h-[90vh] flex flex-col p-0 gap-0">
+            <div className="h-full w-full">
+              <Tabs selectedIndex={activeTabIndex} onSelect={handleTabChange} className="h-full flex flex-col">
                 <TabList>
                   <Tab value={2}>Local Upload</Tab>
                   <Tab value={1}>Gallery</Tab>
@@ -283,8 +283,8 @@ const AllImages = ({
                 <TabPanel value={2}>
                   <FileAddPage onClickTab={handleTabChange} />
                 </TabPanel>
-                <TabPanel value={1}>
-                  <div>
+                <TabPanel value={1} className="flex-1 min-h-0 flex flex-col">
+                  <div className="h-full flex flex-col relative">
                     <DialogHeader className="bg-gray-100 p-2">
                       {/* <DialogTitle>Select Image</DialogTitle> */}
                       <div className="grid grid-cols-3  my-2">
@@ -341,8 +341,8 @@ const AllImages = ({
                         </div>
                       </div>
                     </DialogHeader>
-                    <div className="grid gap-2 grid-cols-[15%_1fr]">
-                      <div className="overflow-y-auto py-4 max-h-[380px]">
+                    <div className="grid gap-2 grid-cols-[15%_1fr] flex-1 min-h-0 overflow-hidden px-2">
+                      <div className="overflow-y-auto py-4 h-full border-r">
                         <div className="flex items-center justify-between">
                           <p className="mb-3 font-medium">Categories:</p>
                           {/* <p>add +</p> */}
@@ -421,10 +421,10 @@ const AllImages = ({
                             );
                           })}
                       </div>
-                      <div className="grid grid-cols-[75%_1fr]">
+                      <div className="grid grid-cols-[75%_1fr] h-full overflow-hidden">
                         {isImagesLoading ? (
-                          <div className="min-h-[75vh] text-lg text-center">
-                            <div className="grid gap-4 grid-cols-6">
+                          <div className="h-full overflow-y-auto text-lg text-center">
+                            <div className="grid gap-4 grid-cols-6 p-4">
                               <Skeleton className="h-[100px] min-w-full" />
                               <Skeleton className="h-[100px] min-w-full" />
                               <Skeleton className="h-[100px] min-w-full" />
@@ -446,7 +446,7 @@ const AllImages = ({
                             </div>
                           </div>
                         ) : (
-                          <div className="min-h-[50vh] max-h-[75vh] overflow-scroll pb-40">
+                          <div className="h-full overflow-y-auto pb-4 p-2">
                             <div
                               className={`grid gap-y-5   ${images &&
                                 images.length > 0 &&
@@ -526,7 +526,7 @@ const AllImages = ({
                             </div>
                           </div>
                         )}
-                        <div className="border-l min-h-[50vh] max-h-[75vh] overflow-y-auto">
+                        <div className="border-l h-full overflow-y-auto">
                           <ImageEditSidebar
                             selectedImage={selectedImage}
                             onClose={() => setSelectedImage(null)}
@@ -535,7 +535,7 @@ const AllImages = ({
                         </div>
                       </div>
                     </div>
-                    <div className="absolute z-30 bg-white border-t px-4 py-2 bottom-0 w-[1050px] left-0">
+                    <div className="bg-white border-t px-4 py-2 w-full">
                       <div className="flex gap-4 items-center">
                         <div className="w-4/5">
                           <p className="mb-2 font-medium">
