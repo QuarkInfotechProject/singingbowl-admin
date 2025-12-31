@@ -534,11 +534,10 @@ const OrderPage = () => {
               <div
                 key={item.name}
                 onClick={() => handleClickStatus(item.key)}
-                className={`cursor-pointer font-medium flex gap-1 items-center ${
-                  (selectedStatusKey || "all") === item.key
+                className={`cursor-pointer font-medium flex gap-1 items-center ${(selectedStatusKey || "all") === item.key
                     ? "text-black font-medium "
                     : "text-blue-700"
-                }`}
+                  }`}
               >
                 <span className="font-semibold text-xs">{item.name}</span>
 
@@ -683,7 +682,7 @@ const OrderPage = () => {
                               View
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
+                          {/* <DropdownMenuItem
                             className="cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -691,7 +690,7 @@ const OrderPage = () => {
                             }}
                           >
                             Edit
-                          </DropdownMenuItem>
+                          </DropdownMenuItem> */}
 
                           <DropdownMenuItem
                             className="cursor-pointer"
@@ -781,9 +780,8 @@ const OrderPage = () => {
               aria-label="Pagination"
             >
               <div
-                className={`relative inline-flex items-center rounded-l-md cursor-pointer px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`relative inline-flex items-center rounded-l-md cursor-pointer px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 onClick={() => {
                   if (currentPage > 1) handlePreviousClick();
                 }}
@@ -798,11 +796,10 @@ const OrderPage = () => {
               </span>
 
               <div
-                className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${
-                  currentPage === totalPages
+                className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${currentPage === totalPages
                     ? "opacity-50 cursor-not-allowed"
                     : ""
-                }`}
+                  }`}
                 onClick={() => {
                   if (currentPage < totalPages) handleNextClick();
                 }}

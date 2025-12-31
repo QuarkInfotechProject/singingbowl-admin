@@ -124,13 +124,13 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
     }
   };
 
-  const handleOtherOrders = (selectedId) => {
+  const handleOtherOrders = (selectedId: string) => {
     if (selectedId) {
       router.push(`/admin/orders?userId=${selectedId}`);
     }
   };
   // Function to convert hash to color
-  const hashToColor = (hash) => {
+  const hashToColor = (hash: string) => {
     if (!hash) return;
     const cleanHash = hash.charAt(0) === "#" ? hash.substring(1, 7) : hash;
     const rgb = parseInt(cleanHash, 16);
@@ -140,7 +140,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
     return `rgb(${r}, ${g}, ${b})`;
   };
 
-  const ColorCircle = ({ color }) => (
+  const ColorCircle = ({ color }: { color: string }) => (
     <span
       className="inline-block w-3 h-3 rounded-full mr-1 align-middle"
       style={{ backgroundColor: color }}
@@ -241,7 +241,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
     setIsAnyItemSelected(Object.keys(newSelectedItems).length > 0);
     setSelectAll(
       Object.keys(newSelectedItems).length ===
-        orderShow?.data.itemsOrdered.length
+      orderShow?.data.itemsOrdered.length
     );
   };
 
@@ -454,6 +454,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
     itemsOrdered,
     orderLogData,
     couponData,
+    orderInvoiceDownloadLink,
   } = orderShow?.data;
 
   const handleBack = () => {
@@ -521,7 +522,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
     }
   };
 
-  const onDelete = async (id, noteId) => {
+  const onDelete = async (id: number | string, noteId: string) => {
     setLoading(true);
     const deleteData = {
       orderId: id,
@@ -561,7 +562,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
   const handleSelectAllChange = (checked: boolean) => {
     setSelectAll(checked);
     if (checked && orderShow) {
-      const allItems = orderShow.data.itemsOrdered.reduce((acc, item) => {
+      const allItems = orderShow.data.itemsOrdered.reduce((acc: any, item: ItemOrdered) => {
         acc[item.orderItemId] = {
           quantity: item.quantity,
           totalAmount: parseFloat(item.lineTotal),
@@ -575,10 +576,10 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
     }
   };
 
-  const handleRoute = (id) => {
+  const handleRoute = (id: string) => {
     router.push(`/admin/products/edit/${id}`);
   };
-  const handleRouteRefund = (id) => {
+  const handleRouteRefund = (id: string) => {
     router.push(`/admin/products/edit/${id}`);
   };
 
@@ -599,8 +600,8 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
         return "bg-gray-300 text-gray-800";
       case FAILED:
         return "bg-red-200 text-red-800 font-semibold";
-      case NCELL_ORDER:
-        return "bg-[#622691] text-white font-semibold";
+      // case NCELL_ORDER:
+      //   return "bg-[#622691] text-white font-semibold";
       case FAILED_DELIVERY:
         return "bg-gray-200 text-yellow-600 font-semibold";
       case AWAITING_REFUND:
@@ -617,7 +618,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
         return "bg-gray-500 text-white";
     }
   };
-  const handleViewProfile = (id) => {
+  const handleViewProfile = (id: string) => {
     router.push(`/admin/users/edit/${id}`);
   };
   console.log("new status", newStatus);
@@ -632,122 +633,17 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
   };
   // const handleRefundSubmit = async () => {};
   //dowmnload
-  
-  const handleDownload = async (id: string | number) => {
-  try {
-    if (!id) {
+
+  const handleDownload = (id: string | number) => {
+    if (orderShow?.data?.orderInvoiceDownloadLink) {
+      window.open(orderShow.data.orderInvoiceDownloadLink, "_blank");
+    } else {
       toast({
-        description: "Invalid order ID",
+        description: "Invoice link not available",
         variant: "destructive",
       });
-      return;
     }
-
-    // Environment validation
-    const API_SECRET = process.env.NEXT_PUBLIC_API_SECRET;
-    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-    
-    if (!API_SECRET || !BASE_URL) {
-      toast({
-        description: "Configuration error. Please try again later.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Generate request signature
-    const nonce = crypto.randomBytes(16).toString("hex");
-    const timestamp = Date.now();
-    const signature = crypto
-      .createHmac("sha256", API_SECRET)
-      .update(`${nonce}${timestamp}`)
-      .digest("hex");
-    let token: string;
-    try {
-      const tokenResponse = await axios.post("/api/getToken", {
-        nonce,
-        timestamp,
-        signature,
-      });
-      if (!tokenResponse.data?.token) {
-        throw new Error("No token received from server");
-      }
-      token = tokenResponse.data.token;
-    } catch (tokenError) {
-      toast({
-        description: "Authentication failed. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-    // Download invoice
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/pdf",
-    };
-
-    const response = await fetch(
-      `${BASE_URL}/orders/download-invoice/${id}`,
-      {
-        method: "GET",
-        headers,
-      }
-    );
-
-    // Proper response status checking
-    if (!response.ok) {
-      throw new Error(`Download failed with status: ${response.status}`);
-    }
-
-    // Check if response is actually a PDF
-    const contentType = response.headers.get("content-type");
-    if (contentType && !contentType.includes("application/pdf")) {
-      throw new Error("Invalid file format received");
-    }
-    const blob = await response.blob();
-    // Validate blob
-    if (blob.size === 0) {
-      throw new Error("Empty file received");
-    }
-    // Create and trigger download
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `invoice-${userDetails?.name}.pdf`;
-    
-    // More reliable download trigger
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    }, 100);
-    toast({
-      description: "Invoice downloaded successfully",
-      className: "bg-green-500 text-white",
-    });
-  } catch (error) {
-    console.error("Download failed:", error);
-    
-    // More specific error messages
-    let errorMessage = "Failed to download invoice";
-    
-    if (error instanceof Error) {
-      if (error.message.includes("status: 404")) {
-        errorMessage = "Invoice not found";
-      } else if (error.message.includes("status: 403")) {
-        errorMessage = "Access denied";
-      } else if (error.message.includes("status: 500")) {
-        errorMessage = "Server error. Please try again later.";
-      }
-    }
-    
-    toast({
-      description: errorMessage,
-      variant: "destructive",
-    });
-  }
-};
+  };
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-row justify-between items-center gap-2 px-4 ">
@@ -1087,11 +983,10 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
           <div className="py-4 flex justify-between">
             <Button
               onClick={toggleRefund}
-              className={`w-fit flex justify-between items-center ${
-                isRefundExpanded
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-blue-500 hover:bg-blue-600"
-              } text-white hover:text-white`}
+              className={`w-fit flex justify-between items-center ${isRefundExpanded
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-blue-500 hover:bg-blue-600"
+                } text-white hover:text-white`}
               variant="outline"
             >
               {isRefundExpanded ? "Cancel" : "Refund"}
@@ -1190,7 +1085,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                       <div></div>
                       <Button
                         className="bg-blue-500 hover:bg-blue-600 w-fit "
-                        // onClick={() => handleRefundSubmit(orderShow.data.id)}
+                      // onClick={() => handleRefundSubmit(orderShow.data.id)}
                       >
                         Process Refund
                       </Button>
@@ -1339,12 +1234,12 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                   </TooltipProvider>
                   <span className="px-1 pb-1"> :</span>
                 </strong>{" "}
-               $ {userDetails.totalRevenue}
+                $ {userDetails.totalRevenue}
               </p>
               <p>
                 <strong>Average Order Value : </strong>
                 {"   "}
-               $ {userDetails.averageOrderValue}
+                $ {userDetails.averageOrderValue}
               </p>
             </CardContent>
             {/* <CardFooter>
@@ -1380,11 +1275,10 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                 {logShow?.data?.map((item) => (
                   <div
                     key={item.noteId}
-                    className={`p-3 rounded-lg border border-gray-200 shadow-sm ${
-                      item.noteType === "Personal Note"
-                        ? "bg-[hsl(324,8%,88%)]"
-                        : "bg-gray-"
-                    } `}
+                    className={`p-3 rounded-lg border border-gray-200 shadow-sm ${item.noteType === "Personal Note"
+                      ? "bg-[hsl(324,8%,88%)]"
+                      : "bg-gray-"
+                      } `}
                   >
                     <div className="flex justify-between items-start">
                       <div>
@@ -1405,7 +1299,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                         // variant="ghost"
                         className="p-1"
                         onClick={() => onDelete(orderShow.data.id, item.noteId)}
-                        // disabled={isLoading}
+                      // disabled={isLoading}
                       >
                         <FaTrash className="text-red-500 text-xs" />
                       </button>
@@ -1434,7 +1328,7 @@ const OrderPageView = ({ params }: { params: { id: string } }) => {
                         Amount:{" "}
                       </span>
                       <span className="text-orange-600 text-sm">
-                       $ {parseFloat(refund.refundDetails.amount).toFixed(0)}
+                        $ {parseFloat(refund.refundDetails.amount).toFixed(0)}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
