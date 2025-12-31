@@ -427,7 +427,7 @@ const AllImages = ({
                           ))}
                         </select>
                       </div>
-                     
+
                     </div>
                   </DialogHeader>
                   <div className="grid gap-2 grid-cols-[15%_1fr]">
@@ -505,7 +505,7 @@ const AllImages = ({
                               key={item.id}
                               variant={
                                 activeCategory.toLowerCase() ===
-                                item.name.toLowerCase()
+                                  item.name.toLowerCase()
                                   ? "secondary"
                                   : "outline"
                               }
@@ -545,11 +545,10 @@ const AllImages = ({
                       ) : (
                         <div className="min-h-[50vh] max-h-[75vh] h-[400px] overflow-auto pb-40">
                           <div
-                            className={`grid gap-y-5   ${
-                              images &&
-                              images.length > 0 &&
-                              "grid-cols-6 justify-start"
-                            } gap-4 `}
+                            className={`grid gap-4 ${images && images.length > 0
+                                ? "grid-cols-2 md:grid-cols-4 lg:grid-cols-6"
+                                : ""
+                              }`}
                           >
                             {images && images.length !== 0 ? (
                               images.map((item) => {
@@ -588,11 +587,10 @@ const AllImages = ({
                               aria-label="Pagination"
                             >
                               <div
-                                className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${
-                                  currentPage === 1
+                                className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 hover:text-black focus:z-20 focus:outline-offset-0 ${currentPage === 1
                                     ? "opacity-50 cursor-not-allowed"
                                     : ""
-                                }`}
+                                  }`}
                                 onClick={handlePreviousClick}
                                 disabled={currentPage === 1}
                               >
@@ -608,11 +606,10 @@ const AllImages = ({
                               </span>
 
                               <div
-                                className={`relative inline-flex items-center rounded-r-md px-2 py-2 hover:text-black text-gray-700  focus:z-20 focus:outline-offset-0 ${
-                                  currentPage === totalPages
+                                className={`relative inline-flex items-center rounded-r-md px-2 py-2 hover:text-black text-gray-700  focus:z-20 focus:outline-offset-0 ${currentPage === totalPages
                                     ? "opacity-50 cursor-not-allowed"
                                     : ""
-                                }`}
+                                  }`}
                                 onClick={handleNextClick}
                                 disabled={currentPage === totalPages}
                               >
@@ -642,11 +639,10 @@ const AllImages = ({
                           Total Images :{" "}
                           {toUpdate === "additional" ? (
                             <span
-                              className={`font-normal ${
-                                localAdditionalIds.length +
-                                  uploadedImages.length ===
-                                  total && "text-green-600"
-                              }`}
+                              className={`font-normal ${localAdditionalIds.length +
+                                uploadedImages.length ===
+                                total && "text-green-600"
+                                }`}
                             >
                               {localAdditionalIds.length +
                                 uploadedImages.length}
@@ -654,7 +650,7 @@ const AllImages = ({
                             </span>
                           ) : toUpdate === "descriptions" ? (
                             <span
-                           
+
                             >
                               {localDescriptionIds?.length > 0 ? 1 : 0} / 1
                             </span>
@@ -693,7 +689,7 @@ const AllImages = ({
                                 />
                               )}
                             </div>
-                           
+
                           )}
                           {localAdditionalThumbnails.length > 0 && (
                             <div className="flex max-w-[900px] overflow-x-auto pb-4 gap-6 px-2">
@@ -766,9 +762,9 @@ const AllImages = ({
                                     className="w-full h-full object-cover"
                                   />
                                 )}
-                               
+
                               </div>
-                              
+
                             </div>
                           )}
                         </div>
@@ -804,8 +800,8 @@ const AllImages = ({
               </TabPanel>
             </Tabs>
           </div>
-        </DialogContent>
-      </div>
+        </DialogContent >
+      </div >
     </>
   );
 };
@@ -907,22 +903,25 @@ const SingleImage = ({
             <div>
               <Image
                 src={item.imageUrl}
-                className={`w-full h-auto object-contain select-none aspect-square bg-gradient-to-r from-slate-50 to-zinc-100 ${
-                  uploadedImages?.includes(item.id.toString()) &&
+                className={`w-full h-auto object-cover select-none aspect-square rounded-md border bg-gray-50 ${uploadedImages?.includes(item.id.toString()) &&
                   "pointer-events-none"
-                } ${
-                  (uploadedImages?.length + localAdditionalIds.length >=
+                  } ${(uploadedImages?.length + localAdditionalIds.length >=
                     total ||
                     localAdditionalIds.includes(item.id?.toString()) ||
                     localDescriptionIds?.includes(item.id?.toString()) ||
                     localBaseId === item.id.toString()) &&
                   "opacity-45 pointer-events-none"
-                }`}
+                  }`}
                 height={200}
                 width={200}
                 alt={item.fileName || "Image"}
               />
-              <h1 className="text-xs font-bold p-1">{item.fileName}</h1>
+              <p
+                title={item.fileName}
+                className="text-xs font-medium p-1 text-center w-full truncate"
+              >
+                {item.fileName}
+              </p>
             </div>
           )}
 
