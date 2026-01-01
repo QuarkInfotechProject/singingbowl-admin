@@ -8,8 +8,10 @@ import { clientSideFetch } from "@/app/_utils/clientSideFetch";
 const animatedComponents = makeAnimated();
 
 // Define proper types for the product objects
+// Define proper types for the product objects
 interface Product {
   id: string;
+  uuid?: string;
   name: string;
 }
 
@@ -22,10 +24,13 @@ const Productselect = ({ form, field }: { form: any; field: any }) => {
   const [selectedProduct, setSelectedProduct] = useState<SelectOption[]>([]);
 
   const renderProduct = (products: Product[]) => {
-    return products?.map((currentProduct) => ({
-      value: currentProduct.id,
-      label: currentProduct.name,
-    }));
+    if (!Array.isArray(products)) return [];
+    return products
+      .filter((p) => p && (p.uuid || p.id) && p.name)
+      .map((currentProduct) => ({
+        value: currentProduct.uuid ? String(currentProduct.uuid) : String(currentProduct.id), // Use UUID if available
+        label: currentProduct.name,
+      }));
   };
 
   // Get Products using React Query
@@ -49,7 +54,10 @@ const Productselect = ({ form, field }: { form: any; field: any }) => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
   const products = data?.data.data.data || [];
-  // console.log("data", products.data);
+  if (products.length > 0) {
+    console.log("DEBUG: First Product Object keys:", Object.keys(products[0]));
+    console.log("DEBUG: First Product Object full:", products[0]);
+  }
   // Handle query error
   useEffect(() => {
     if (error) {
@@ -75,9 +83,10 @@ const Productselect = ({ form, field }: { form: any; field: any }) => {
 
   const handleProductChange = (selectedValue: SelectOption[] | null) => {
     if (selectedValue && selectedValue.length > 0) {
-      const selectedProductIds = selectedValue.map(
-        (selected) => selected.value
-      );
+      const selectedProductIds = selectedValue
+        .map((selected) => selected.value)
+        .filter((val) => val !== undefined && val !== null); // Ensure no undefined values
+
       setSelectedProduct(selectedValue);
       form.setValue(field.name, selectedProductIds);
       form.trigger(field.name);

@@ -49,7 +49,7 @@ const formSchema = z
   .object({
     name: z.string().nonempty("Name is required"),
     code: z.string().nonempty("Code is required"),
-    type: z.string().nonempty({ message: "Please select coupon type" }),
+    type: z.string().default("free_shipping"),
     value: z.string().optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
@@ -133,9 +133,6 @@ interface RootInventoryProps {
   formData: any;
 }
 const paymentMethodOptions = [
-  { value: "esewa", label: "eSewa" },
-  { value: "khalti", label: "Khalti" },
-  { value: "IMEPay", label: "IMEPay" },
   { value: "card", label: "Visa/Master" },
   { value: "cod", label: "Cash On Delivery" },
 ];
@@ -183,6 +180,7 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...formData,
+      type: "free_shipping", // Default to free_shipping
       products: formData.products || [],
       excludeProducts: formData.excludeProducts || [],
       relatedCoupons: formData.relatedCoupons?.toString() || [],
@@ -222,8 +220,9 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
           body: JSON.stringify({}),
         });
         const data = await res.json();
-        setCouponData(data.data.data);
-        setCouponDataExcluded(data.data.data);
+        // Fixed: safely access nested data property
+        setCouponData(data?.data?.data || []);
+        setCouponDataExcluded(data?.data?.data || []);
         // setTotalPages(data.data.last_page)
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -433,12 +432,7 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="percentage">
-                              Percentage Discount
-                            </SelectItem>
-                            <SelectItem value="fixed_cart">
-                              Fixed Cart Discount
-                            </SelectItem>
+                            {/* Only display Free Shipping option */}
                             <SelectItem value="free_shipping">
                               Free Shipping
                             </SelectItem>
@@ -536,8 +530,8 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
                               Minimum Spend
                               {(couponType === "percentage" ||
                                 couponType === "fixed_cart") && (
-                                <span className="text-red-500">*</span>
-                              )}
+                                  <span className="text-red-500">*</span>
+                                )}
                             </FormLabel>
                             <FormControl>
                               <Input

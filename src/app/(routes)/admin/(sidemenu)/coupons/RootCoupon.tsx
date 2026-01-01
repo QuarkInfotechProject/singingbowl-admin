@@ -129,12 +129,12 @@ const RootCoupon = ({
 
       if (res.ok) {
         setRefetch(!refetch);
-        toast({ className:"bg-green-500 text-white font-semibold", description: "Coupon deleted successfully" });
+        toast({ className: "bg-green-500 text-white font-semibold", description: "Coupon deleted successfully" });
         setCoupon((prevAttributes) =>
           prevAttributes !== null
             ? prevAttributes.filter((coupon) =>
-                coupon.data.data.map((items) => items.id !== id)
-              )
+              coupon.data.data.map((items) => items.id !== id)
+            )
             : []
         );
       } else {
@@ -280,13 +280,12 @@ const RootCoupon = ({
 
                     <TableCell>
                       <span
-                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                          item.isActive === 1
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${item.isActive
                             ? "bg-green-100 text-green-600"
                             : "bg-red-100 text-red-600"
-                        }`}
+                          }`}
                       >
-                        {item.isActive === 1 ? "Active" : "Inactive"}
+                        {item.isActive ? "Active" : "Inactive"}
                       </span>
                     </TableCell>
 
@@ -395,9 +394,8 @@ const RootCoupon = ({
           aria-label="Pagination"
         >
           <div
-            className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${
-              currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`relative inline-flex items-center cursor-pointer rounded-l-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             onClick={() => {
               if (currentPage > 1) handlePreviousClick();
             }}
@@ -412,9 +410,8 @@ const RootCoupon = ({
           </span>
 
           <div
-            className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${
-              currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`relative inline-flex items-center cursor-pointer rounded-r-md px-2 py-2 text-gray-700  hover:text-black focus:z-20 focus:outline-offset-0 ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             onClick={() => {
               if (currentPage < totalPages) handleNextClick();
             }}
@@ -426,7 +423,7 @@ const RootCoupon = ({
         </nav>
       </div>
 
- 
+
     </div>
   );
 };
