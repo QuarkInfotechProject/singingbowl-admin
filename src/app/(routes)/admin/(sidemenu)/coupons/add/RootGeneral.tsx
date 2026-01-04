@@ -432,7 +432,12 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {/* Only display Free Shipping option */}
+                            <SelectItem value="percentage">
+                              Percentage Discount
+                            </SelectItem>
+                            <SelectItem value="fixed_cart">
+                              Fixed Cart Discount
+                            </SelectItem>
                             <SelectItem value="free_shipping">
                               Free Shipping
                             </SelectItem>
@@ -645,7 +650,8 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
                           </FormItem>
                         )}
                       />
-                      <FormField
+                      {/* Payment Method field hidden - empty array passed in body */}
+                      {/* <FormField
                         control={form.control}
                         name="paymentMethods"
                         render={({ field }) => (
@@ -666,7 +672,7 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
                             <FormMessage />
                           </FormItem>
                         )}
-                      />
+                      /> */}
                       <FormField
                         control={form.control}
                         name="minQuantity"
@@ -741,7 +747,7 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
                     </div>
                   </div>
                   {/* category */}
-                  <div>
+                  {/* <div>
                     <h2 className="text-xl font-semibold mb-4 border-b pb-2">
                       Category
                     </h2>
@@ -775,7 +781,7 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
                         )}
                       />
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Related Coupons Section */}
                   <div>

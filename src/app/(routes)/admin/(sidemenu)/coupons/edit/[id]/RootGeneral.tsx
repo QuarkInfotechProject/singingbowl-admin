@@ -236,31 +236,31 @@ const RootGeneral: React.FC<RootInventoryProps> = ({
     router.push("/admin/coupons");
   };
 
-const {data: catProduct, isLoading: catProductLoading} = useQuery({
-  queryKey: ["catProduct"],
-  queryFn: async () => {
-    return await clientSideFetch({
-      url: "/products?per_page=1000000",
-      method: "post",
-      body: {
-        status: "1",
-        name: "",
-        sku: "",
-        sortBy: "created_at",
-        sortDirection: "asc",
-      },
-      toast: "skip",
-    });
-  },
-});
+  const { data: catProduct, isLoading: catProductLoading } = useQuery({
+    queryKey: ["catProduct"],
+    queryFn: async () => {
+      return await clientSideFetch({
+        url: "/products?per_page=1000000",
+        method: "post",
+        body: {
+          status: "1",
+          name: "",
+          sku: "",
+          sortBy: "created_at",
+          sortDirection: "asc",
+        },
+        toast: "skip",
+      });
+    },
+  });
 
-// Move setState calls into useEffect
-useEffect(() => {
-  if (!catProductLoading && catProduct?.data?.data?.data) {
-    setCatalogData(catProduct.data.data.data);
-    setCatalogDataSecond(catProduct.data.data.data);
-  }
-}, [catProductLoading, catProduct]);
+  // Move setState calls into useEffect
+  useEffect(() => {
+    if (!catProductLoading && catProduct?.data?.data?.data) {
+      setCatalogData(catProduct.data.data.data);
+      setCatalogDataSecond(catProduct.data.data.data);
+    }
+  }, [catProductLoading, catProduct]);
 
   useEffect(() => {
     const getCoupons = async () => {
@@ -296,13 +296,14 @@ useEffect(() => {
   const renderTags = (
     catalog: Product[]
   ): { value: string; label: string }[] => {
-    return catalog.map((product: Product) => {
+    return catalog.map((product: any) => {
       // Ensure product.name is a string
       const productName =
         product && product.name ? product.name : `Product ${product.id}`;
 
       return {
-        value: product.id,
+        // Use UUID if available, otherwise fall back to ID
+        value: product.uuid ? String(product.uuid) : String(product.id),
         label: productName,
       };
     });
@@ -311,9 +312,10 @@ useEffect(() => {
   const renderTagsSecond = (
     catalog: Product[]
   ): { value: string; label: string }[] => {
-    return catalog.map((product: Product) => {
+    return catalog.map((product: any) => {
       return {
-        value: product.id.toString(),
+        // Use UUID if available, otherwise fall back to ID
+        value: product.uuid ? String(product.uuid) : String(product.id),
         label: product.name || `Product ${product.id}`,
       };
     });
@@ -492,28 +494,31 @@ useEffect(() => {
         ) {
           console.log("Products from API:", editCouponsData.products);
 
-          // Map products to IDs for form value
-          const productIds = editCouponsData.products.map((item) => {
+          // Map products to UUIDs for form value
+          const productUuids = editCouponsData.products.map((item) => {
             if (typeof item === "object" && item !== null) {
+              // Prefer UUID if available
+              if ("uuid" in item && (item as ComplexProduct).uuid) {
+                return (item as ComplexProduct).uuid!;
+              }
               if ("id" in item) {
                 return String((item as ComplexProduct).id);
-              }
-              if ("uuid" in item) {
-                return (item as ComplexProduct).uuid!;
               }
             }
             return String(item);
           });
 
-          form.setValue("products", productIds);
+          form.setValue("products", productUuids);
 
-          // Map to select options for display
-          const selectedProductOptions = productIds
-            .map((id) => {
-              const product = catalogData.find((p) => p.id === id);
+          // Map to select options for display - find by UUID
+          const selectedProductOptions = productUuids
+            .map((uuid) => {
+              const product = catalogData.find((p: any) =>
+                p.uuid === uuid || String(p.id) === uuid
+              );
               if (product) {
                 return {
-                  value: product.id,
+                  value: (product as any).uuid ? String((product as any).uuid) : String(product.id),
                   label: product.name || `Product ${product.id}`,
                 };
               }
@@ -528,29 +533,31 @@ useEffect(() => {
         if (editCouponsData.exclude && Array.isArray(editCouponsData.exclude)) {
           console.log("Excluded products from API:", editCouponsData.exclude);
 
-          // Map excluded products to IDs for form value
-          const excludedIds = editCouponsData.exclude.map((item) => {
+          // Map excluded products to UUIDs for form value
+          const excludedUuids = editCouponsData.exclude.map((item) => {
             if (typeof item === "object" && item !== null) {
-              // Handle case when exclude contains full product objects
-              // if ("id" in item) {
-              //   return String((item as ComplexProduct).id);
-              // }
-              if ("uuid" in item) {
-                return (item as ComplexProduct).uuid;
+              // Prefer UUID if available
+              if ("uuid" in item && (item as ComplexProduct).uuid) {
+                return (item as ComplexProduct).uuid!;
+              }
+              if ("id" in item) {
+                return String((item as ComplexProduct).id);
               }
             }
             return String(item);
           });
 
-          form.setValue("excludeProducts", excludedIds);
-          // Create select options from the excluded product IDs
-          const excludedProductOptions = excludedIds.map((id) => {
-            // Find the product in our catalog data
-            const product = catalogDataSecond.find((p) => p.id === id);
+          form.setValue("excludeProducts", excludedUuids);
+          // Create select options from the excluded product UUIDs
+          const excludedProductOptions = excludedUuids.map((uuid) => {
+            // Find the product in our catalog data by UUID
+            const product = catalogDataSecond.find((p: any) =>
+              p.uuid === uuid || String(p.id) === uuid
+            );
 
             if (product) {
               return {
-                value: product.id,
+                value: (product as any).uuid ? String((product as any).uuid) : String(product.id),
                 label: product.name || `Product ${product.id}`,
               };
             }
@@ -559,26 +566,26 @@ useEffect(() => {
             const rawProduct = editCouponsData.exclude.find((item) => {
               if (typeof item === "object" && item !== null) {
                 return (
-                  String((item as ComplexProduct).id) === id ||
-                  (item as ComplexProduct).uuid === id
+                  (item as ComplexProduct).uuid === uuid ||
+                  String((item as ComplexProduct).id) === uuid
                 );
               }
-              return String(item) === id;
+              return String(item) === uuid;
             });
 
             if (typeof rawProduct === "object" && rawProduct !== null) {
               return {
-                value: id,
+                value: uuid,
                 label:
                   (rawProduct as ComplexProduct).product_name ||
                   (rawProduct as ComplexProduct).name ||
-                  `Product ${id}`,
+                  `Product ${uuid}`,
               };
             }
 
             return {
-              value: id,
-              label: `Product ${id}`,
+              value: uuid,
+              label: `Product ${uuid}`,
             };
           });
 
@@ -852,10 +859,10 @@ useEffect(() => {
                                   Minimum Spend
                                   {(form.watch("type") === "percentage" ||
                                     form.watch("type") === "fixed_cart") && (
-                                    <span className="text-red-500 ml-0.5">
-                                      *
-                                    </span>
-                                  )}
+                                      <span className="text-red-500 ml-0.5">
+                                        *
+                                      </span>
+                                    )}
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -984,7 +991,8 @@ useEffect(() => {
                             )}
                           />
 
-                          <FormField
+                          {/* Payment Method field hidden - empty array passed in body */}
+                          {/* <FormField
                             control={form.control}
                             name="paymentMethods"
                             render={({ field }) => (
@@ -1005,7 +1013,7 @@ useEffect(() => {
                                 <FormMessage />
                               </FormItem>
                             )}
-                          />
+                          /> */}
                           <FormField
                             control={form.control}
                             name="minQuantity"
@@ -1090,41 +1098,41 @@ useEffect(() => {
                           />
                         </div>
                       </div>
-                      <div>
-                        <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-                          Category
-                        </h2>
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="categories"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-md">
-                                  Include Category
-                                </FormLabel>
+                        {/* <div>
+                          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+                            Category
+                          </h2>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="categories"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-md">
+                                    Include Category
+                                  </FormLabel>
 
-                                <CategorySelect form={form} field={field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                                  <CategorySelect form={form} field={field} />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
-                          <FormField
-                            control={form.control}
-                            name="excludeCategories"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-md">
-                                  Exclude Category
-                                </FormLabel>
-                                <CategorySelect form={form} field={field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
+                            <FormField
+                              control={form.control}
+                              name="excludeCategories"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-md">
+                                    Exclude Category
+                                  </FormLabel>
+                                  <CategorySelect form={form} field={field} />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div> */}
 
                       {/* Related Coupons Section */}
                       <div>

@@ -55,8 +55,10 @@ const CategorySelect = ({ form, field }: { form: any; field: any }) => {
   // Set default selected Category when the Category are fetched and `field.value` is available
   useEffect(() => {
     if (Category.length > 0 && field.value && field.value.length > 0) {
+      // Convert field values to strings for comparison since option values are strings
+      const fieldValueStrings = field.value.map((v: number | string) => String(v));
       const defaultSelected = renderCategory(Category).filter((option) =>
-        field.value.includes(option.value)
+        fieldValueStrings.includes(String(option.value))
       );
       setSelectedCategory(defaultSelected);
     } else if (!field.value || field.value.length === 0) {
@@ -66,8 +68,9 @@ const CategorySelect = ({ form, field }: { form: any; field: any }) => {
 
   const handleCategoryChange = (selectedValue: SelectOption[] | null) => {
     if (selectedValue && selectedValue.length > 0) {
+      // Convert to numbers to match form schema (z.array(z.number()))
       const selectedCategoryIds = selectedValue.map(
-        (selected) => selected.value
+        (selected) => Number(selected.value)
       );
       setSelectedCategory(selectedValue);
       form.setValue(field.name, selectedCategoryIds);
